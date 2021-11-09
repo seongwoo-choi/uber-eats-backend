@@ -5,6 +5,7 @@ import { join } from 'path';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RestaurantsModule } from './restaurants/restaurants.module';
 import { ConfigModule } from '@nestjs/config';
+import { Restaurant } from './restaurants/entities/restaurant.entity';
 
 console.log(process.env.NODE_ENV);
 // process.env.NODE_ENV 에 강제적으로 타입을 지정 가능하다.
@@ -48,9 +49,12 @@ console.log(process.env.NODE_ENV);
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
       // typeorm 이 DB에 연결할 때 데이터베이스를 너의 모듈의 현재 상태로 마이그레이션 한다는 뜻
-      synchronize: true,
-      // 데이터베이스에서 무슨 일이 일어나느지 콘솔에 표시
-      logging: false,
+      // graphQL 에서 사용하는 스키마를 자동으로 생성해주고 DB 에도 자동으로 즉시 반영해준다.
+      synchronize: process.env.NODE_ENV !== 'prod',
+      // 데이터베이스에서 무슨 일이 일어나는지 콘솔에 표시
+      logging: true,
+      // TypeORM 이 DB 에 Restaurant entity 를 테이블 수 있도록 등록
+      entities: [Restaurant],
     }),
     // setting root module, here forRoot() => root module
     // Apollo server need schema and resolver
@@ -63,7 +67,7 @@ console.log(process.env.NODE_ENV);
       // autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       // 메모리로부터 스키마 파일을 만든다. 위와 같이 실제 파일이 생성되지는 않고 메모리 상에 적재된다.
       // 둘 모두 똑같은 의미를 가진다.
-      autoSchemaFile: true,
+      autoSchemaFile: process.env.NODE_ENV !== 'prod',
       // localhost:3000/graphql
       playground: true,
     }),
