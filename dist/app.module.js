@@ -9,9 +9,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AppModule = void 0;
 const common_1 = require("@nestjs/common");
 const graphql_1 = require("@nestjs/graphql");
+const Joi = require("joi");
 const typeorm_1 = require("@nestjs/typeorm");
 const restaurants_module_1 = require("./restaurants/restaurants.module");
 const config_1 = require("@nestjs/config");
+console.log(process.env.NODE_ENV);
 let AppModule = class AppModule {
 };
 AppModule = __decorate([
@@ -19,15 +21,24 @@ AppModule = __decorate([
         imports: [
             config_1.ConfigModule.forRoot({
                 isGlobal: true,
-                envFilePath: process.env.NODE_ENV === 'dev' ? '.dev.env' : '.env.test',
+                envFilePath: process.env.NODE_ENV === 'dev' ? '.env.dev' : '.env.test',
+                ignoreEnvFile: process.env.NODE_ENV === 'prod',
+                validationSchema: Joi.object({
+                    NODE_ENV: Joi.string().valid('dev', 'prod').required(),
+                    DB_PORT: Joi.number().required(),
+                    DB_HOST: Joi.string().required(),
+                    DB_USERNAME: Joi.string().required(),
+                    DB_PASSWORD: Joi.string().required(),
+                    DB_NAME: Joi.string().required(),
+                }),
             }),
             typeorm_1.TypeOrmModule.forRoot({
                 type: 'postgres',
-                host: 'localhost',
-                port: 5432,
-                username: 'choi',
-                password: '0326',
-                database: 'uber-eats',
+                host: process.env.DB_HOST,
+                port: +process.env.DB_PORT,
+                username: process.env.DB_USERNAME,
+                password: process.env.DB_PASSWORD,
+                database: process.env.DB_NAME,
                 synchronize: true,
                 logging: false,
             }),

@@ -34,6 +34,7 @@ export class RestaurantsResolver {
     // InputType 을 사용하여 위를 아래와 같이 줄일 수 있게 됐다.
     // 다만 문제는 CreateRestaurantDto 의 모든 속성에 대한 값을 입력받아야 한다는 점이다.
     // @Args('createRestaurantInput') CreateRestaurantInput: createRestaurantDto,
+    // CreateRestaurantDto 에서 유효성 검사를 하고 있기 때문에 자동적으로 유효성 검사가 된다.
     @Args() createRestaurantDto: CreateRestaurantDto,
   ): boolean {
     console.log(createRestaurantDto);
