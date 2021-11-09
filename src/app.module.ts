@@ -3,9 +3,10 @@ import { GraphQLModule } from '@nestjs/graphql';
 import * as Joi from 'joi';
 import { join } from 'path';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { RestaurantsModule } from './restaurants/restaurants.module';
 import { ConfigModule } from '@nestjs/config';
-import { Restaurant } from './restaurants/entities/restaurant.entity';
+import { UsersModule } from './users/users.module';
+import { CommonModule } from './common/common.module';
+import { User } from './users/entites/user.entity';
 
 console.log(process.env.NODE_ENV);
 // process.env.NODE_ENV 에 강제적으로 타입을 지정 가능하다.
@@ -54,7 +55,7 @@ console.log(process.env.NODE_ENV);
       // 데이터베이스에서 무슨 일이 일어나는지 콘솔에 표시
       logging: true,
       // TypeORM 이 DB 에 Restaurant entity 를 테이블 수 있도록 등록
-      entities: [Restaurant],
+      entities: [User],
     }),
     // setting root module, here forRoot() => root module
     // Apollo server need schema and resolver
@@ -71,7 +72,8 @@ console.log(process.env.NODE_ENV);
       // localhost:3000/graphql
       playground: true,
     }),
-    RestaurantsModule,
+    UsersModule,
+    CommonModule,
   ],
   controllers: [],
   providers: [],
