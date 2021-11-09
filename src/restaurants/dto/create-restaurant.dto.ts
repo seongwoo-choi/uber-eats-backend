@@ -1,9 +1,9 @@
-import { ArgsType, Field, InputType, OmitType } from '@nestjs/graphql';
-import { IsBoolean, IsString, Length } from 'class-validator';
+import { InputType, OmitType } from '@nestjs/graphql';
 import { Restaurant } from '../entities/restaurant.entity';
 
 // class-validator 설정을 해줬다 해도 유효성 검사가 되는 것이 아니다.
 // validation-pipeline 을 만들어줘야 한다.
+// OmitType 으로 extends 한 Restaurant 클래스에서 유효성 검사를 체크, 자식 클래스에서도 유효성 검사가 이뤄진다.
 @InputType()
 // @ArgsType()
 // id 를 제외한 레스토랑 엔티티를 상속받는다. Omit 타입은 @InputType 에서만 작동한다. Restaurant 은 오브젝트 타입이다..
