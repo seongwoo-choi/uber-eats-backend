@@ -14,7 +14,7 @@ const typeorm_1 = require("@nestjs/typeorm");
 const config_1 = require("@nestjs/config");
 const users_module_1 = require("./users/users.module");
 const common_module_1 = require("./common/common.module");
-const user_entity_1 = require("./users/entites/user.entity");
+const user_entity_1 = require("./users/entities/user.entity");
 console.log(process.env.NODE_ENV);
 let AppModule = class AppModule {
 };

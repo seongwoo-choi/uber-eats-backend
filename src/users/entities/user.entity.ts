@@ -8,6 +8,7 @@ import {
 import { CoreEntity } from '../../common/entities/core.entity';
 import * as bcrypt from 'bcrypt';
 import { InternalServerErrorException } from '@nestjs/common';
+import { IsEmail, IsEnum, IsString } from 'class-validator';
 
 // UserRole.Owner => 1 이 되고 DB 에 저장이 된다.
 enum UserRole {
@@ -26,6 +27,7 @@ registerEnumType(UserRole, { name: 'UserRole' });
 export class User extends CoreEntity {
   @Field((type) => String)
   @Column()
+  @IsEmail()
   email: string;
 
   @Field((type) => String)
@@ -37,6 +39,8 @@ export class User extends CoreEntity {
   @Field((type) => UserRole)
   // DB 에서 enum 타입을 쓸 것이고 UserRole 이라는 데이터를 사용할 것
   @Column({ type: 'enum', enum: UserRole })
+  // class-validator 사용
+  @IsEnum(UserRole)
   role: UserRole;
 
   // DB 에 저장하기 전, 즉 Service 에서 this.userRepository.save(this.userRepository.create()) 메서드가 실행하기 전에
@@ -47,6 +51,16 @@ export class User extends CoreEntity {
       this.password = await bcrypt.hash(this.password, 10);
     } catch (e) {
       // 에러가 발생할 경우 InternalServerErrorException() 을 던지고 이 에러는 Service 단의 try catch 문에서 잡히게 된다.
+      console.log(e);
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async checkPassword(aPassword: string): Promise<boolean> {
+    try {
+      const ok = await bcrypt.compare(aPassword, this.password);
+      return ok;
+    } catch (e) {
       console.log(e);
       throw new InternalServerErrorException();
     }

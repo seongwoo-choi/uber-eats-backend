@@ -6,7 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './users/users.module';
 import { CommonModule } from './common/common.module';
-import { User } from './users/entites/user.entity';
+import { User } from './users/entities/user.entity';
 
 console.log(process.env.NODE_ENV);
 // process.env.NODE_ENV 에 강제적으로 타입을 지정 가능하다.
