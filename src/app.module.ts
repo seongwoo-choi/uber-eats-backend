@@ -7,6 +7,7 @@ import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './users/users.module';
 import { CommonModule } from './common/common.module';
 import { User } from './users/entities/user.entity';
+import { JwtModule } from './jwt/jwt.module';
 
 console.log(process.env.NODE_ENV);
 // process.env.NODE_ENV 에 강제적으로 타입을 지정 가능하다.
@@ -18,7 +19,7 @@ console.log(process.env.NODE_ENV);
 @Module({
   imports: [
     ConfigModule.forRoot({
-      // isGlobal 옵션 => 우리 어플리케이션의 어디서나 config 모듈에 접근할 수 있다.
+      // isGlobal 옵션 => 어플리케이션의 어디서나 config 모듈에 접근할 수 있다.
       isGlobal: true,
       // 폴더에서 .env.dev 파일을 읽는다.
       // .env.test, .env.dev, .production.env 환경을 각각 사용할 것
@@ -36,6 +37,7 @@ console.log(process.env.NODE_ENV);
         DB_USERNAME: Joi.string().required(),
         DB_PASSWORD: Joi.string().required(),
         DB_NAME: Joi.string().required(),
+        SECRET_KEY: Joi.string().required(),
       }),
     }),
     TypeOrmModule.forRoot({
@@ -74,6 +76,9 @@ console.log(process.env.NODE_ENV);
     }),
     UsersModule,
     CommonModule,
+    JwtModule.forRoot({
+      privateKey: process.env.SECRET_KEY,
+    }),
   ],
   controllers: [],
   providers: [],
