@@ -16,8 +16,15 @@ const users_module_1 = require("./users/users.module");
 const common_module_1 = require("./common/common.module");
 const user_entity_1 = require("./users/entities/user.entity");
 const jwt_module_1 = require("./jwt/jwt.module");
+const jwt_middleware_1 = require("./jwt/jwt.middleware");
 console.log(process.env.NODE_ENV);
 let AppModule = class AppModule {
+    configure(consumer) {
+        consumer.apply(jwt_middleware_1.JwtMiddleware).forRoutes({
+            path: '/*',
+            method: common_1.RequestMethod.ALL,
+        });
+    }
 };
 AppModule = __decorate([
     (0, common_1.Module)({
