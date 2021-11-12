@@ -9,6 +9,7 @@ import {
 import { LoginInput, LoginOutput } from './dto/login.dto';
 import { AuthGuard } from '../auth/auth.guard';
 import { UseGuards } from '@nestjs/common';
+import { AuthUser } from '../auth/auth-user.decorator';
 
 @Resolver((of) => User)
 export class UsersResolver {
@@ -55,9 +56,17 @@ export class UsersResolver {
     }
   }
 
+  // @Query((returns) => User)
+  // // 로그인 되어있지 않다면 request 진행을 막는다.
+  // @UseGuards(AuthGuard)
+  // async me(@Context() context) {
+  //   return context['user'];
+  // }
+
   @Query((returns) => User)
+  // 로그인 되어있지 않다면 request 진행을 막는다.
   @UseGuards(AuthGuard)
-  async me(@Context() context) {
-    return;
+  async me(@AuthUser() authUser: User) {
+    return authUser;
   }
 }
