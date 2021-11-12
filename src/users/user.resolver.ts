@@ -1,7 +1,6 @@
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { User } from './entities/user.entity';
 import { UsersService } from './user.service';
-import { Restaurant } from '../restaurants/entities/restaurant.entity';
 import {
   CreateAccountInput,
   CreateAccountOutput,

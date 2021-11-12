@@ -18,14 +18,16 @@ export class JwtMiddleware implements NestMiddleware {
     if ('x-jwt' in req.headers) {
       const token = req.headers['x-jwt'];
 
-      // token 을 verify 해서 올바른 토큰인지 아닌지 확인한다. => decode 하여 암호해독 된 token 을 준다.
-      // .toString() => 문자열로 변환
-      const decoded = this.jwtService.verify(token.toString());
+      try {
+        // token 을 verify 해서 올바른 토큰인지 아닌지 확인한다. => decode 하여 암호해독 된 token 을 준다.
+        // .toString() => 문자열로 변환
+        const decoded = this.jwtService.verify(token.toString());
 
-      if (typeof decoded === 'object' && decoded.hasOwnProperty('id')) {
-        try {
+        if (typeof decoded === 'object' && decoded.hasOwnProperty('id')) {
           req['user'] = await this.usersService.findById(decoded['id']);
-        } catch (e) {}
+        }
+      } catch (e) {
+        console.log(e);
       }
     }
     next();
