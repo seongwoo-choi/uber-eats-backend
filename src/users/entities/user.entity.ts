@@ -1,4 +1,4 @@
-import { BeforeInsert, Column, Entity } from 'typeorm';
+import { BeforeInsert, BeforeUpdate, Column, Entity } from 'typeorm';
 import {
   Field,
   InputType,
@@ -43,9 +43,11 @@ export class User extends CoreEntity {
   @IsEnum(UserRole)
   role: UserRole;
 
-  // DB 에 저장하기 전, 즉 Service 에서 this.userRepository.save(this.userRepository.create()) 메서드가 실행하기 전에
+  // DB 에 저장하기 전, 즉 Service 에서 this.userRepository.save(this.userRepository.create()) 메서드가 실행하기 전에 아래 메서드가 실행된다.
   // 해당 인스턴스의 password 를 받아서 해시한다.
   @BeforeInsert()
+  // DB 에 Update 하기 전, 즉 Service 에서 this.userRepository.update() 메서드가 실행되서 DB 에 업데이트 되기 전에 아래 메서드가 실행된다.
+  @BeforeUpdate()
   async hashPassword(): Promise<void> {
     try {
       this.password = await bcrypt.hash(this.password, 10);

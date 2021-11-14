@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { CreateAccountInput } from './dto/create-account.dto';
 import { LoginInput } from './dto/login.dto';
 import { JwtService } from '../jwt/jwt.service';
+import { EditProfileInput } from './dto/edit-profile.dto';
 
 @Injectable()
 export class UsersService {
@@ -93,5 +94,26 @@ export class UsersService {
 
   async findById(id: number): Promise<User> {
     return this.userRepository.findOne({ id });
+  }
+
+  async editProfile(
+    userId: number,
+    { email, password }: EditProfileInput,
+  ): Promise<User> {
+    // update 는 entity 를 부분적으로 update 한다.
+    // db 에 entity 가 존재하는지 안하는지 체크하지 않는다.
+    // login 한 경우가 아니면 user service 에서 editProfile 을 실행할 수 없다.
+    // criteria 에는 변경하고자 하는 녀석을 값을 key-value 로 지정해서 넘겨주고, 그 후에 update 할 내용을 넘겨준다.
+    // typeORM 은 string, number, number[], objectID 모두 criteria 로 보낼 수 있다.
+    // await this.userRepository.update({ id: userId }, { email, password });
+    // update 후 영향을 받은 결과나 영향을 받은 행의 갯수나 SQL query 나 생성된 data 인 generatedMaps 를 return 한다.
+    const user = await this.userRepository.findOne(userId);
+    if (email) {
+      user.email = email;
+    }
+    if (password) {
+      user.password = password;
+    }
+    return await this.userRepository.save(user);
   }
 }
