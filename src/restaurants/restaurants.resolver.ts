@@ -38,7 +38,6 @@ export class RestaurantsResolver {
     // 원래라면 아래와 같은 방식으로 사용한다.
     // @Args('id') id: number,
     // @Args('data') data: UpdateRestaurantDto,
-
     // 하지만 아래처럼 하나의 dto 로 처리하는 것이 깔끔하다.
     @Args() updateRestaurantDto: UpdateRestaurantDto,
   ): Promise<boolean> {
