@@ -30,8 +30,9 @@ export class User extends CoreEntity {
   @IsEmail()
   email: string;
 
+  // beforeInsert 로 인해 해시화 된 비밀번호가 또 해시화 되서 DB 에 저장되는 것을 방지하기 위해 select: false 를 사용
   @Field((type) => String)
-  @Column()
+  @Column({ select: false })
   password: string;
 
   // graphql, db 에서 enum 타입을 사용할 수 있도록 상기 작업들이 필요
@@ -53,12 +54,15 @@ export class User extends CoreEntity {
   // DB 에 Update 하기 전, 즉 Service 에서 this.userRepository.update() 메서드가 실행되서 DB 에 업데이트 되기 전에 아래 메서드가 실행된다.
   @BeforeUpdate()
   async hashPassword(): Promise<void> {
-    try {
-      this.password = await bcrypt.hash(this.password, 10);
-    } catch (e) {
-      // 에러가 발생할 경우 InternalServerErrorException() 을 던지고 이 에러는 Service 단의 try catch 문에서 잡히게 된다.
-      console.log(e);
-      throw new InternalServerErrorException();
+    // save() 로 전달된 object 에 password 가 있으면 그 때 password 를 해시화한다.
+    if (this.password) {
+      try {
+        this.password = await bcrypt.hash(this.password, 10);
+      } catch (e) {
+        // 에러가 발생할 경우 InternalServerErrorException() 을 던지고 이 에러는 Service 단의 try catch 문에서 잡히게 된다.
+        console.log(e);
+        throw new InternalServerErrorException();
+      }
     }
   }
 

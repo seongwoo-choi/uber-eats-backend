@@ -68,7 +68,11 @@ export class UsersService {
     // 3. JWT 를 만들고 user 에게 주기
     try {
       // .findOne({ email: email })
-      const user = await this.userRepository.findOne({ email });
+      const user = await this.userRepository.findOne(
+        { email },
+        // select 가 false 여서 select: ['password'] 로 값을 명시적으로 적어야 가져온다.
+        { select: ['id', 'password', 'email', 'verified'] },
+      );
       if (!user) {
         return {
           ok: false,
@@ -87,6 +91,7 @@ export class UsersService {
       // ConfigService 를 DI 받아서 configService 를 service 단에서 사용 가능
       // const token = jwt.sign({ id: user.id }, this.config.get('SECRET_KEY'));
       // const token = this.jwtService.sign({ id: user.id });
+      console.log(user);
       const token = this.jwtService.sign(user.id);
       return {
         ok: true,
@@ -128,5 +133,36 @@ export class UsersService {
       user.password = password;
     }
     return await this.userRepository.save(user);
+  }
+
+  async verifyEmail(code: string): Promise<boolean> {
+    // 1. verification 을 찾는다.
+    // 2. 만약 존재한다면 verification 을 삭제
+    // 3. 그리고 그 verification 가 연결된 user 를 찾아 verified 를 true 로 변경
+
+    try {
+      const verification = await this.verificationRepository.findOne(
+        {
+          code: code,
+        },
+        { relations: ['user'] },
+
+        // { loadRelationIds: true },
+      );
+
+      if (verification) {
+        // verification 의 user 릴레이션을 타고가서 verified 를 true 로 수정
+        verification.user.verified = true;
+        console.log(verification.user);
+        // user 의 값이 수정되었고 userRepository 로 verification.user, 즉 수정된 유저를 save -> update
+        // this.userRepository.save(verification.user); -> 문제 발생, save 메서드를 사용했기 때문에 비밀번호가 또 한번 더 해쉬된다.
+        await this.userRepository.save(verification.user);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
   }
 }

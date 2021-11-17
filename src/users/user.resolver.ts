@@ -11,6 +11,7 @@ import { UseGuards } from '@nestjs/common';
 import { AuthUser } from '../auth/auth-user.decorator';
 import { UserProfileInput, UserProfileOutput } from './dto/user-profile.dto';
 import { EditProfileInput, EditProfileOutput } from './dto/edit-profile.dto';
+import { VerifyEmailInput, VerifyEmailOutput } from './dto/verify-email.dto';
 
 @Resolver((of) => User)
 export class UsersResolver {
@@ -105,6 +106,24 @@ export class UsersResolver {
       console.log(authUser);
       console.log(editProfileInput);
       await this.userService.editProfile(authUser.id, editProfileInput);
+      return {
+        ok: true,
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error,
+      };
+    }
+  }
+
+  // 인증 필요 x => 살펴볼 것은 유저의 클릭 여부
+  @Mutation((returns) => VerifyEmailOutput)
+  async verifyEmail(
+    @Args('input') { code: code }: VerifyEmailInput,
+  ): Promise<VerifyEmailOutput> {
+    try {
+      await this.userService.verifyEmail(code);
       return {
         ok: true,
       };
