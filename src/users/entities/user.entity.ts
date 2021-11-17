@@ -43,6 +43,10 @@ export class User extends CoreEntity {
   @IsEnum(UserRole)
   role: UserRole;
 
+  @Column({ default: false })
+  @Field((type) => Boolean)
+  verified: boolean;
+
   // DB 에 저장하기 전, 즉 Service 에서 this.userRepository.save(this.userRepository.create()) 메서드가 실행하기 전에 아래 메서드가 실행된다.
   // 해당 인스턴스의 password 를 받아서 해시한다.
   @BeforeInsert()

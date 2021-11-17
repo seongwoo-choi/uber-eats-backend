@@ -15,6 +15,7 @@ import { JwtModule } from './jwt/jwt.module';
 import { JwtMiddleware } from './jwt/jwt.middleware';
 import { AuthModule } from './auth/auth.module';
 import { Restaurant } from './restaurants/entities/restaurant.entity';
+import { Verification } from './users/entities/verification.entity';
 
 console.log(process.env.NODE_ENV);
 // process.env.NODE_ENV 에 강제적으로 타입을 지정 가능하다.
@@ -64,7 +65,7 @@ console.log(process.env.NODE_ENV);
       // 데이터베이스에서 무슨 일이 일어나는지 콘솔에 표시
       logging: true,
       // TypeORM 이 DB 에 Restaurant entity 를 테이블 수 있도록 등록
-      entities: [User],
+      entities: [User, Verification],
     }),
     // setting root module, here forRoot() => root module
     // Apollo server need schema and resolver

@@ -6,11 +6,14 @@ import { CreateAccountInput } from './dto/create-account.dto';
 import { LoginInput } from './dto/login.dto';
 import { JwtService } from '../jwt/jwt.service';
 import { EditProfileInput } from './dto/edit-profile.dto';
+import { Verification } from './entities/verification.entity';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
+    @InjectRepository(Verification)
+    private readonly verificationRepository: Repository<Verification>,
     private readonly jwtService: JwtService,
   ) {
     // console.log(this.config.get('SECRET_KEY'));
@@ -38,8 +41,13 @@ export class UsersService {
       }
 
       // 계정을 생성하고 DB 에 계정 저장
-      await this.userRepository.save(
+      const user = await this.userRepository.save(
         this.userRepository.create({ email, password, role }),
+      );
+      await this.verificationRepository.save(
+        this.verificationRepository.create({
+          user,
+        }),
       );
       return { ok: true };
     } catch (e) {
@@ -108,8 +116,13 @@ export class UsersService {
     // await this.userRepository.update({ id: userId }, { email, password });
     // update 후 영향을 받은 결과나 영향을 받은 행의 갯수나 SQL query 나 생성된 data 인 generatedMaps 를 return 한다.
     const user = await this.userRepository.findOne(userId);
+    // user 의 email 이 변경되면 verified 를 false 로 변경
     if (email) {
       user.email = email;
+      user.verified = false;
+      await this.verificationRepository.save(
+        this.verificationRepository.create({ user }),
+      );
     }
     if (password) {
       user.password = password;
