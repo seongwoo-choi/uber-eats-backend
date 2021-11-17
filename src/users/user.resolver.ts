@@ -15,123 +15,47 @@ import { VerifyEmailInput, VerifyEmailOutput } from './dto/verify-email.dto';
 
 @Resolver((of) => User)
 export class UsersResolver {
-  constructor(private readonly userService: UsersService) {}
-
-  @Query((returns) => String)
-  async hi() {
-    return 'hi';
-  }
-
-  @Query((returns) => [User])
-  async getAll(): Promise<User[]> {
-    return this.userService.getAll();
-  }
+  constructor(private readonly usersService: UsersService) {}
 
   @Mutation((returns) => CreateAccountOutput)
   async createAccount(
-    @Args('input') createAccount: CreateAccountInput,
+    @Args('input') createAccountInput: CreateAccountInput,
   ): Promise<CreateAccountOutput> {
-    try {
-      const { ok, error } = await this.userService.createAccount(createAccount);
-
-      return {
-        ok,
-        error,
-      };
-    } catch (error) {
-      return {
-        error,
-        ok: false,
-      };
-    }
+    return this.usersService.createAccount(createAccountInput);
   }
 
   @Mutation((returns) => LoginOutput)
   async login(@Args('input') loginInput: LoginInput): Promise<LoginOutput> {
-    try {
-      return this.userService.login(loginInput);
-    } catch (error) {
-      return {
-        ok: false,
-        error,
-      };
-    }
+    return this.usersService.login(loginInput);
   }
 
-  // @Query((returns) => User)
-  // // 로그인 되어있지 않다면 request 진행을 막는다.
-  // @UseGuards(AuthGuard)
-  // async me(@Context() context) {
-  //   return context['user'];
-  // }
-
   @Query((returns) => User)
-  // 로그인 되어있지 않다면 request 진행을 막는다.
   @UseGuards(AuthGuard)
-  async me(@AuthUser() authUser: User) {
+  me(@AuthUser() authUser: User) {
     return authUser;
   }
 
-  @Query((returns) => UserProfileOutput)
   @UseGuards(AuthGuard)
+  @Query((returns) => UserProfileOutput)
   async userProfile(
     @Args() userProfileInput: UserProfileInput,
   ): Promise<UserProfileOutput> {
-    try {
-      const user = await this.userService.findById(userProfileInput.userId);
-      if (!user) {
-        throw Error('NotFoundUser');
-      }
-      return {
-        ok: true,
-        user: user,
-      };
-    } catch (e) {
-      console.log(e);
-      return {
-        error: '해당하는 유저를 찾을 수 없습니다.',
-        ok: false,
-      };
-    }
+    return this.usersService.findById(userProfileInput.userId);
   }
 
   @UseGuards(AuthGuard)
   @Mutation((returns) => EditProfileOutput)
-  // @AuthUser() 는 로그인 한 계정의 정보를 준다.
   async editProfile(
     @AuthUser() authUser: User,
     @Args('input') editProfileInput: EditProfileInput,
   ): Promise<EditProfileOutput> {
-    try {
-      console.log(authUser);
-      console.log(editProfileInput);
-      await this.userService.editProfile(authUser.id, editProfileInput);
-      return {
-        ok: true,
-      };
-    } catch (error) {
-      return {
-        ok: false,
-        error,
-      };
-    }
+    return this.usersService.editProfile(authUser.id, editProfileInput);
   }
 
-  // 인증 필요 x => 살펴볼 것은 유저의 클릭 여부
   @Mutation((returns) => VerifyEmailOutput)
-  async verifyEmail(
-    @Args('input') { code: code }: VerifyEmailInput,
+  verifyEmail(
+    @Args('input') { code }: VerifyEmailInput,
   ): Promise<VerifyEmailOutput> {
-    try {
-      await this.userService.verifyEmail(code);
-      return {
-        ok: true,
-      };
-    } catch (error) {
-      return {
-        ok: false,
-        error,
-      };
-    }
+    return this.usersService.verifyEmail(code);
   }
 }
