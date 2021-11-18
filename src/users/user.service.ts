@@ -12,6 +12,7 @@ import { EditProfileInput, EditProfileOutput } from './dto/edit-profile.dto';
 import { Verification } from './entities/verification.entity';
 import { VerifyEmailOutput } from './dto/verify-email.dto';
 import { UserProfileOutput } from './dto/user-profile.dto';
+import { MailService } from '../mail/mail.service';
 
 @Injectable()
 export class UsersService {
@@ -20,6 +21,7 @@ export class UsersService {
     @InjectRepository(Verification)
     private readonly verificationRepository: Repository<Verification>,
     private readonly jwtService: JwtService,
+    private readonly mailService: MailService,
   ) {
     // console.log(this.config.get('SECRET_KEY'));
     // console.log(this.config.get('DB_NAME'));
@@ -49,11 +51,12 @@ export class UsersService {
       const user = await this.userRepository.save(
         this.userRepository.create({ email, password, role }),
       );
-      await this.verificationRepository.save(
+      const verification = await this.verificationRepository.save(
         this.verificationRepository.create({
           user,
         }),
       );
+      this.mailService.sendVerificationEmail(user.email, verification.code);
       return { ok: true };
     } catch (e) {
       console.log(e);
@@ -143,9 +146,10 @@ export class UsersService {
       if (email) {
         user.email = email;
         user.verified = false;
-        await this.verificationRepository.save(
+        const verification = await this.verificationRepository.save(
           this.verificationRepository.create({ user }),
         );
+        this.mailService.sendVerificationEmail(user.email, verification.code);
       }
       if (password) {
         user.password = password;
