@@ -113,7 +113,6 @@ export class UsersService {
   async findById(id: number): Promise<UserProfileOutput> {
     try {
       const user = await this.userRepository.findOne({ id });
-      console.log('findById >>>>>> ', user);
       if (user) {
         return {
           ok: true,
@@ -180,7 +179,10 @@ export class UsersService {
         verification.user.verified = true;
         // user 의 값이 수정되었고 userRepository 로 verification.user, 즉 수정된 유저를 save -> update
         // this.userRepository.save(verification.user); -> 문제 발생, save 메서드를 사용했기 때문에 비밀번호가 또 한번 더 해쉬된다.
+        // 유저 인증 완료
         await this.userRepository.save(verification.user);
+        // 인증되면 인증서를 삭제한다. 하나의 유저에 하나의 인증서만 존재하기 때문
+        await this.verificationRepository.delete(verification.id);
         return { ok: true };
       }
       return { ok: false, error: 'Verification Not found' };

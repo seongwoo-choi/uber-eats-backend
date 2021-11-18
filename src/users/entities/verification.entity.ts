@@ -12,7 +12,8 @@ export class Verification extends CoreEntity {
   @Field((type) => String)
   code: string;
 
-  // user 가 삭제, 업데이트 됐을 때 동작을 지정 가능 -> CASCADE 유저를 삭제하면 user 와 붙어있는 verification 도 같이 삭제한다.
+  // 외래키가 주인이 아니다. 외래키와 연관되어 있는 엔티티가 주인이다.
+  // user 가 삭제, 업데이트 됐을 때 동작을 지정 가능 -> CASCADE 는 유저를 삭제하면 user 와 붙어있는 verification 도 같이 삭제한다.
   @OneToOne((type) => User, { onDelete: 'CASCADE' })
   // @Field((type) => User)
   // 외래키를 갖는다. OneToOne 관계를 갖는 엔티티 중 한 곳에서만 JoinColumn 을 사용해야 한다.

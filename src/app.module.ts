@@ -16,6 +16,7 @@ import { JwtMiddleware } from './jwt/jwt.middleware';
 import { AuthModule } from './auth/auth.module';
 import { Restaurant } from './restaurants/entities/restaurant.entity';
 import { Verification } from './users/entities/verification.entity';
+import { MailModule } from './mail/mail.module';
 
 console.log(process.env.NODE_ENV);
 // process.env.NODE_ENV 에 강제적으로 타입을 지정 가능하다.
@@ -46,6 +47,9 @@ console.log(process.env.NODE_ENV);
         DB_PASSWORD: Joi.string().required(),
         DB_NAME: Joi.string().required(),
         SECRET_KEY: Joi.string().required(),
+        MAILGUN_API_KEY: Joi.string().required(),
+        MAILGUN_DOMAIN_NAME: Joi.string().required(),
+        MAILGUN_FROM_EMAIL: Joi.string().required(),
       }),
     }),
     TypeOrmModule.forRoot({
@@ -87,6 +91,11 @@ console.log(process.env.NODE_ENV);
     UsersModule,
     JwtModule.forRoot({
       privateKey: process.env.SECRET_KEY,
+    }),
+    MailModule.forRoot({
+      apiKey: process.env.MAINGUN_API_KEY,
+      domain: process.env.MAILGUN_DOMAIN_NAME,
+      fromEmail: process.env.MAILGUN_FROM_EMAIL,
     }),
   ],
   controllers: [],
