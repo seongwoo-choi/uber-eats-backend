@@ -67,7 +67,7 @@ AppModule = __decorate([
                 privateKey: process.env.SECRET_KEY,
             }),
             mail_module_1.MailModule.forRoot({
-                apiKey: process.env.MAINGUN_API_KEY,
+                apiKey: process.env.MAILGUN_API_KEY,
                 domain: process.env.MAILGUN_DOMAIN_NAME,
                 fromEmail: process.env.MAILGUN_FROM_EMAIL,
             }),
