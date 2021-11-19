@@ -152,33 +152,76 @@ export class UsersService {
         ],
         relations: ['verification'],
       });
-      console.log(user);
+      console.log('user >>>> ', user);
 
-      const newVerification = user.verification;
+      if (user.verification) {
+        // user 와 verification 을 양방향 연관관계를 맺어서 레포지토리에서 값을 찾지 않고 user.verification 으로 데이터를 가져왔다.
+        const newVerification = user.verification;
+        if (email) {
+          user.email = email;
+          user.verified = false;
+          // email 이 변경되면 code 값을 변경
+          newVerification.code = uuidv4();
 
-      // user 의 email 이 변경되면 verified 를 false 로 변경
-      if (email) {
-        user.email = email;
-        user.verified = false;
-        newVerification.code = uuidv4();
+          // 변경된 값을 저장
+          await this.verificationRepository.save(newVerification);
+          console.log('user >>>> ', user);
+          console.log('newVerification >>>>>', newVerification);
 
-        await this.verificationRepository.save(newVerification);
-        console.log('user >>>> ', user);
+          this.mailService.sendVerificationEmail(
+            user.email,
+            newVerification.code,
+          );
 
-        this.mailService.sendVerificationEmail(
-          user.email,
-          newVerification.code,
-        );
+          if (password) {
+            user.password = password;
+          }
+          await this.userRepository.save(
+            this.userRepository.create({
+              ...user,
+            }),
+          );
+          return { ok: true };
+        }
+      } else {
+        if (password) {
+          user.password = password;
+
+          await this.userRepository.save(
+            this.userRepository.create({
+              ...user,
+            }),
+          );
+        }
+        if (email) {
+          user.email = email;
+          user.verified = false;
+
+          const newVerification1 = new Verification();
+
+          newVerification1.user = user;
+          newVerification1.code = uuidv4();
+
+          console.log('newVerification >>>> ', newVerification1);
+
+          await this.userRepository.save(
+            this.userRepository.create({
+              ...user,
+            }),
+          );
+          await this.verificationRepository.save(newVerification1);
+          // console.log('no user.verification >>>> ', user);
+          // console.log('newVerification >>>>> ', newVerification);
+          // console.log('user.verification >>>>> ', user.verification);
+
+          this.mailService.sendVerificationEmail(
+            user.email,
+            newVerification1.code,
+          );
+
+          return { ok: true };
+        }
       }
-      if (password) {
-        user.password = password;
-      }
-      await this.userRepository.save(
-        this.userRepository.create({
-          ...user,
-        }),
-      );
-      return { ok: true };
     } catch (error) {
       console.log('error >>>>>', error);
       return {
