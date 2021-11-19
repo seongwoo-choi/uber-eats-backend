@@ -157,6 +157,7 @@ export class UsersService {
       if (user.verification) {
         // user 와 verification 을 양방향 연관관계를 맺어서 레포지토리에서 값을 찾지 않고 user.verification 으로 데이터를 가져왔다.
         const newVerification = user.verification;
+
         if (email) {
           user.email = email;
           user.verified = false;
@@ -172,17 +173,17 @@ export class UsersService {
             user.email,
             newVerification.code,
           );
-
-          if (password) {
-            user.password = password;
-          }
-          await this.userRepository.save(
-            this.userRepository.create({
-              ...user,
-            }),
-          );
-          return { ok: true };
         }
+        if (password) {
+          user.password = password;
+        }
+        await this.userRepository.save(
+          this.userRepository.create({
+            ...user,
+          }),
+        );
+
+        return { ok: true };
       } else {
         if (password) {
           user.password = password;
@@ -197,30 +198,29 @@ export class UsersService {
           user.email = email;
           user.verified = false;
 
-          const newVerification1 = new Verification();
+          const newVerification = new Verification();
 
-          newVerification1.user = user;
-          newVerification1.code = uuidv4();
+          newVerification.user = user;
+          newVerification.code = uuidv4();
 
-          console.log('newVerification >>>> ', newVerification1);
+          console.log('newVerification >>>> ', newVerification);
 
           await this.userRepository.save(
             this.userRepository.create({
               ...user,
             }),
           );
-          await this.verificationRepository.save(newVerification1);
+          await this.verificationRepository.save(newVerification);
           // console.log('no user.verification >>>> ', user);
           // console.log('newVerification >>>>> ', newVerification);
           // console.log('user.verification >>>>> ', user.verification);
 
           this.mailService.sendVerificationEmail(
             user.email,
-            newVerification1.code,
+            newVerification.code,
           );
-
-          return { ok: true };
         }
+        return { ok: true };
       }
     } catch (error) {
       console.log('error >>>>>', error);
