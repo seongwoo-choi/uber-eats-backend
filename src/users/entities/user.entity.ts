@@ -1,4 +1,4 @@
-import { BeforeInsert, BeforeUpdate, Column, Entity } from 'typeorm';
+import { BeforeInsert, BeforeUpdate, Column, Entity, OneToOne } from 'typeorm';
 import {
   Field,
   InputType,
@@ -9,6 +9,7 @@ import { CoreEntity } from '../../common/entities/core.entity';
 import * as bcrypt from 'bcrypt';
 import { InternalServerErrorException } from '@nestjs/common';
 import { IsEmail, IsEnum, IsString } from 'class-validator';
+import { Verification } from './verification.entity';
 
 // UserRole.Owner => 1 이 되고 DB 에 저장이 된다.
 enum UserRole {
@@ -47,6 +48,10 @@ export class User extends CoreEntity {
   @Column({ default: false })
   @Field((type) => Boolean)
   verified: boolean;
+
+  @Field((type) => Verification)
+  @OneToOne((type) => Verification, (verification) => verification.user)
+  verification: Verification;
 
   // DB 에 저장하기 전, 즉 Service 에서 this.userRepository.save(this.userRepository.create()) 메서드가 실행하기 전에 아래 메서드가 실행된다.
   // 해당 인스턴스의 password 를 받아서 해시한다.

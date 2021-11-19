@@ -13,6 +13,7 @@ import { Verification } from './entities/verification.entity';
 import { VerifyEmailOutput } from './dto/verify-email.dto';
 import { UserProfileOutput } from './dto/user-profile.dto';
 import { MailService } from '../mail/mail.service';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class UsersService {
@@ -140,24 +141,46 @@ export class UsersService {
     // update 후 영향을 받은 결과나 영향을 받은 행의 갯수나 SQL query 나 생성된 data 인 generatedMaps 를 return 한다.
     try {
       const user = await this.userRepository.findOne(userId, {
-        select: ['password', 'email', 'role'],
+        select: [
+          'id',
+          'createdAt',
+          'updatedAt',
+          'email',
+          'password',
+          'role',
+          'verified',
+        ],
+        relations: ['verification'],
       });
+      console.log(user);
+
+      const newVerification = user.verification;
+
       // user 의 email 이 변경되면 verified 를 false 로 변경
       if (email) {
         user.email = email;
         user.verified = false;
-        const verification = await this.verificationRepository.save(
-          this.verificationRepository.create({ user }),
+        newVerification.code = uuidv4();
+
+        await this.verificationRepository.save(newVerification);
+        console.log('user >>>> ', user);
+
+        this.mailService.sendVerificationEmail(
+          user.email,
+          newVerification.code,
         );
-        this.mailService.sendVerificationEmail(user.email, verification.code);
       }
       if (password) {
         user.password = password;
       }
-      await this.userRepository.save(user);
+      await this.userRepository.save(
+        this.userRepository.create({
+          ...user,
+        }),
+      );
       return { ok: true };
     } catch (error) {
-      console.log(error);
+      console.log('error >>>>>', error);
       return {
         ok: false,
         error: '유저가 업데이트 되지 않았습니다.',
