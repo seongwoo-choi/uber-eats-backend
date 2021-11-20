@@ -154,6 +154,8 @@ export class UsersService {
       });
       console.log('user >>>> ', user);
 
+      // CASE 1. 인증이 완료되서 Verification 이 비어있는 상태 => 이 경우엔 password 변경 시엔 문제가 없지만 email 을 변경할 경우 새롭게 Verification 객체를 만들어줘야 한다.
+      // CASE 2. Verification 이 있는 상태
       if (user.verification) {
         // user 와 verification 을 양방향 연관관계를 맺어서 레포지토리에서 값을 찾지 않고 user.verification 으로 데이터를 가져왔다.
         const newVerification = user.verification;
