@@ -77,8 +77,28 @@ describe('UserService', () => {
   });
 
   describe('createAccount', () => {
-    // 존재하는 유저로 속여서 실패하게 만든다.
-    it('유저가 존재하면 실패', () => {});
+    // 존재하는 유저로 속여서 실패하게 만든다. => ok: false 와 error 를 반환
+    // mock 은 함수의 반환값을 속일 수 있다.
+    it('유저가 존재하면 실패', async () => {
+      // findOne 이 실패하면 mockResolvedValue 를 한다. => Promise.resolve(value) 를 하는 것과 같다.
+      // Promise 의 ResolverValue 를 속인다는 뜻
+      // jest 가 중간에 findOne 함수를 가로채서 반환값을 아래 값으로 속인다.
+      // 즉, findOne 의 값은 DB 에서 쿼리문을 날려서 조회한 값이 아닌 jest 로 속인 아래의 값이다.
+      userRepository.findOne.mockResolvedValue({
+        id: 1,
+        email: 'asdads@naver.com',
+      });
+      // service.createAccount 실행 => userRepository.findOne => jest 가 낚아채서 위의 값으로 반환한다.
+      const result = await service.createAccount({
+        email: '',
+        password: '',
+        role: 0,
+      });
+      expect(result).toMatchObject({
+        ok: false,
+        error: 'There is a user with that email already',
+      });
+    });
   });
   it.todo('login');
   it.todo('findById');

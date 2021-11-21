@@ -42,6 +42,7 @@ export class UsersService {
     // 데이터베이스에 존재하는 이메일인지 체크해야 한다.
     try {
       const exists = await this.userRepository.findOne({ email });
+      console.log(exists);
       if (exists) {
         // 에러 발생 throw new error, return false
         // throw Error(); or throw new BadRequestError();
