@@ -44,6 +44,7 @@ describe('UserService', () => {
   // 여기서 중요한 것은 Repository 의 모든 키를 가져오고 싶다는 것 => keyof Repository<Entity>, 변환할 타입(jest.Mock)
   // 요소의 집합이란 건 UserRepository 의 모든 요소들을 말한다. find, create, save 등 등.. 그리고 이것들의 타입은 mock 이다.
   let userRepository: MockRepository<User>;
+  let verificationsRepository: MockRepository<Verification>;
 
   // 모듈을 만든다 => 이 모듈을 유저 서비스 단 하나만을 갖는다.
   beforeAll(async () => {
@@ -70,6 +71,7 @@ describe('UserService', () => {
     }).compile();
     service = module.get<UserService>(UserService);
     userRepository = module.get(getRepositoryToken(User));
+    verificationsRepository = module.get(getRepositoryToken(Verification));
   });
 
   it('should be defined', () => {

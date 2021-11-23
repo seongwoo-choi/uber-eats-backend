@@ -13,7 +13,6 @@ export class AuthGuard implements CanActivate {
       // 이 가드를 어디서 사용하든 간에 false 를 리턴해서 request 를 막는다.
       return false;
     }
-
     return true;
   }
 }

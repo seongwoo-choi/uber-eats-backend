@@ -49,7 +49,7 @@ export class UsersService {
         return { ok: false, error: '이미 존재하는 이메일입니다.' };
       }
 
-      // 계정을 생성하고 DB 에 계정 저장
+      // 계정을 생성하고 DB 에 계정 저장 => BeforeInsert 로 인해 password 암호화
       const user = await this.userRepository.save(
         this.userRepository.create({ email, password, role }),
       );
