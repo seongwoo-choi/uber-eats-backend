@@ -84,6 +84,7 @@ describe('UserService', () => {
       password: '',
       role: 0,
     };
+
     // mock 은 함수의 반환값을 속일 수 있다.
     it('유저가 존재하면 실패', async () => {
       // 즉, findOne 의 값은 DB 에서 쿼리문을 날려서 조회한 값이 아닌 jest 로 속인 아래의 값이다.
