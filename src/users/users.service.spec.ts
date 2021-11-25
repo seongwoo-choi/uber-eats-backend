@@ -45,6 +45,7 @@ describe('UserService', () => {
   // 요소의 집합이란 건 UserRepository 의 모든 요소들을 말한다. find, create, save 등 등.. 그리고 이것들의 타입은 mock 이다.
   let userRepository: MockRepository<User>;
   let verificationsRepository: MockRepository<Verification>;
+  let mailService: MailService;
 
   // 모듈을 만든다 => 이 모듈을 유저 서비스 단 하나만을 갖는다.
   beforeAll(async () => {
@@ -70,6 +71,7 @@ describe('UserService', () => {
       ],
     }).compile();
     service = module.get<UserService>(UserService);
+    mailService = module.get<MailService>(MailService);
     userRepository = module.get(getRepositoryToken(User));
     verificationsRepository = module.get(getRepositoryToken(Verification));
   });
@@ -100,18 +102,53 @@ describe('UserService', () => {
       });
     });
     it('유저가 존재하면 성공', async () => {
-      // const exists = await this.userRepository.findOne({ email }); => undefined 리턴
+      // 모든 return value 를 다 mock 해야 한다.
+      // const exists = await this.userRepository.findOne({ email }); => undefined 리턴, 유저는 존재 x
       await userRepository.findOne.mockResolvedValue(undefined);
+      // userRepository.create 를 호출할 때 create 는 entity 인 user 를 리턴한다는 것
+      // create 한 똑같은 object 를 리턴
       userRepository.create.mockReturnValue(createAccountArgs);
+      // save 도 똑같은 user object 를 리턴
+      userRepository.save.mockResolvedValue(createAccountArgs);
+      // verification 의 return value 는 user 가 있는 object, verification.create 안에 user 가 있다.
+      verificationsRepository.create.mockReturnValue({
+        user: createAccountArgs,
+      });
+      // verificationsRepository.save 는 또 하나의 mock 을 리턴
+      // string 이 포함되어 있는 또 하나의 코드를 리턴한다.
+      verificationsRepository.save.mockResolvedValue({ code: 'code' });
+
+      // value 를 다 mock 했으면 service 를 호출
       // create 테스트 이후 save 테스트 위해 service.createAccount 실행
-      await service.createAccount(createAccountArgs);
+      const result = await service.createAccount(createAccountArgs);
       // userRepository.create() 메서드가 한 번 만 call 될거라고 기대
       // toHaveBeenCalledTimes 를 사용해서 메서드가 몇 번 불릴지 테스트할 수 있다.
       expect(userRepository.create).toHaveBeenCalledTimes(1);
       // toHaveBeenCalledWith -> 어떤 값들이 호출됐는지 테스트 할 수 있다.
       expect(userRepository.create).toHaveBeenCalledWith(createAccountArgs);
+
       expect(userRepository.save).toHaveBeenCalledTimes(1);
       expect(userRepository.save).toHaveBeenCalledWith(createAccountArgs);
+
+      //const verification = await this.verifications.save(this.verifications.create({ user }));
+      expect(verificationsRepository.create).toHaveBeenCalledTimes(1);
+      expect(verificationsRepository.create).toHaveBeenCalledWith({
+        user: createAccountArgs,
+      });
+      expect(verificationsRepository.create).toHaveBeenCalledTimes(1);
+      expect(verificationsRepository.save).toHaveBeenCalledWith({
+        user: createAccountArgs,
+      });
+
+      // this.mailService.sendVerificationEmail(user.email, verification.code); test
+      expect(mailService.sendVerificationEmail).toHaveBeenCalledTimes(1);
+      // 어떤 function 의 type 의 argument 든 체크할 수 있다.
+      expect(mailService.sendVerificationEmail).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.any(String),
+      );
+
+      expect(result).toEqual({ ok: true });
     });
   });
   it.todo('login');
