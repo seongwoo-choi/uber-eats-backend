@@ -117,13 +117,12 @@ export class UsersService {
 
   async findById(id: number): Promise<UserProfileOutput> {
     try {
-      const user = await this.userRepository.findOne({ id });
-      if (user) {
-        return {
-          ok: true,
-          user: user,
-        };
-      }
+      const user = await this.userRepository.findOneOrFail({ id });
+
+      return {
+        ok: true,
+        user: user,
+      };
     } catch (error) {
       return { ok: false, error: '해당하는 유저를 찾을 수 없습니다.' };
     }

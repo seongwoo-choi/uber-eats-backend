@@ -12,6 +12,7 @@ const mockRepository = () => ({
   findOne: jest.fn(),
   save: jest.fn(),
   create: jest.fn(),
+  findOneOrFail: jest.fn(),
 });
 
 // const mockRepository = {
@@ -73,9 +74,9 @@ describe('UserService', () => {
     }).compile();
     service = module.get<UserService>(UserService);
     mailService = module.get<MailService>(MailService);
+    jwtService = module.get<JwtService>(JwtService);
     userRepository = module.get(getRepositoryToken(User));
     verificationsRepository = module.get(getRepositoryToken(Verification));
-    jwtService = module.get<JwtService>(JwtService);
   });
 
   it('should be defined', () => {
@@ -214,7 +215,24 @@ describe('UserService', () => {
       expect(result).toEqual({ ok: true, token: 'signed-token-baby' });
     });
   });
-  it.todo('findById');
+
+  describe('findById', () => {
+    const findByIdArgs = {
+      id: 1,
+    };
+    it('존재하는 유저를 찾는다.', async () => {
+      userRepository.findOneOrFail.mockResolvedValue(findByIdArgs);
+      const result = await service.findById(1);
+
+      console.log(result);
+      expect(result).toEqual({ ok: true, user: findByIdArgs });
+    });
+    it('should fail if no user is found', async () => {
+      userRepository.findOneOrFail.mockRejectedValue(new Error());
+      const result = await service.findById(1);
+      expect(result).toEqual({ ok: false, error: 'User Not Found' });
+    });
+  });
   it.todo('editProfile');
   it.todo('verifyEmail');
 });
