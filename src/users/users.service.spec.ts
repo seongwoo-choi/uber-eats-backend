@@ -131,8 +131,8 @@ describe('UserService', () => {
 
   describe('login', () => {
     const loginArgs = {
-      email: 'bs@email.com',
-      password: 'bs.password',
+      email: 'bsas@email.com',
+      password: 'bsas.password',
     };
     it('should fail if user does not exist', async () => {
       usersRepository.findOne.mockResolvedValue(null);
