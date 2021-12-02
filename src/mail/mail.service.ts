@@ -24,7 +24,7 @@ export class MailService {
   // NODE.JS 에는 FrontEnd 처럼 Fetch 가 없다. 그래서 보통 패키지를 설치해야 한다.
   // => node.js 에 있는 request 패키지를 사용, node.js 에서 request 를 작성하기 아주 쉽게 해준다. => 하지만 2020 년 이후로 업데이트가 되지 않는다.
   // 그래서 GOT 패키지를 사용한다. npm i got
-  private async sendEmail(
+  async sendEmail(
     subject: string,
     // to: string,
     template: string,
@@ -44,20 +44,24 @@ export class MailService {
     emailVars.forEach((eVar) => form.append(`v:${eVar.key}`, eVar.value));
     // Quietly fail 로 실행 => 에러가 발생해도 아무한테 알리지 않는다.
     try {
-      await got(`https://api.mailgun.net/v3/${this.options.domain}/messages`, {
-        method: 'POST',
-        headers: {
-          // Authorization 은 basic authorization 이라 불린다. => 유저명과 패스워드가 필요
-          // String 값의 포맷을 인코딩하고 바꿔야 한다. base64 로 인코딩
-          // curl -s --user 'api:YOUR_API_KEY' \
-          Authorization: `Basic ${Buffer.from(
-            `api:${this.options.apiKey}`,
-          ).toString('base64')}`,
+      await got.post(
+        `https://api.mailgun.net/v3/${this.options.domain}/messages`,
+        {
+          headers: {
+            // Authorization 은 basic authorization 이라 불린다. => 유저명과 패스워드가 필요
+            // String 값의 포맷을 인코딩하고 바꿔야 한다. base64 로 인코딩
+            // curl -s --user 'api:YOUR_API_KEY' \
+            Authorization: `Basic ${Buffer.from(
+              `api:${this.options.apiKey}`,
+            ).toString('base64')}`,
+          },
+          body: form,
         },
-        body: form,
-      });
+      );
+      return true;
     } catch (error) {
       console.log(error);
+      return false;
     }
   }
 
