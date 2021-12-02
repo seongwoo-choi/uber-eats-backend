@@ -17,7 +17,6 @@ export class JwtMiddleware implements NestMiddleware {
   async use(req: Request, res: Response, next: NextFunction) {
     if ('x-jwt' in req.headers) {
       const token = req.headers['x-jwt'];
-
       try {
         // token 을 verify 해서 올바른 토큰인지 아닌지 확인한다. => decode 하여 암호해독 된 token 을 준다.
         // .toString() => 문자열로 변환
