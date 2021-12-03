@@ -277,6 +277,7 @@ describe('UserService', () => {
         expect.any(Object),
         expect.any(Object),
       );
+
       expect(usersRepository.save).toHaveBeenCalledTimes(1);
       expect(usersRepository.save).toHaveBeenCalledWith({ verified: true });
 
