@@ -74,10 +74,12 @@ describe('UserService', () => {
     };
 
     it('should fail if user exists', async () => {
+      // findOne 메서드로 가져오는 값을 목킹
       usersRepository.findOne.mockResolvedValue({
         id: 1,
         email: '',
       });
+      // user 가 존재하여 if 문 에서 걸러짐
       const result = await service.createAccount(createAccountArgs);
       expect(result).toMatchObject({
         ok: false,
@@ -87,11 +89,15 @@ describe('UserService', () => {
 
     it('should create a new user', async () => {
       usersRepository.findOne.mockResolvedValue(undefined);
+      // create 메서드로 createAccountArgs 값을 갖는 인스턴스를 생성하도록 목킹
       usersRepository.create.mockReturnValue(createAccountArgs);
+      // save 메서드로 createAccountArgs 값을 갖는 인스턴스를 DB 에 저장
       usersRepository.save.mockResolvedValue(createAccountArgs);
+      // verificationRepository create 메서드 목킹
       verificationsRepository.create.mockReturnValue({
         user: createAccountArgs,
       });
+      // verificationRepository save 메서드 목킹
       verificationsRepository.save.mockResolvedValue({
         code: 'code',
       });
@@ -172,9 +178,15 @@ describe('UserService', () => {
     });
 
     it('should fail on exception', async () => {
-      usersRepository.findOne.mockRejectedValue(new Error());
-      const result = await service.login(loginArgs);
-      expect(result).toEqual({ ok: false, error: "Can't log user in." });
+      try {
+        usersRepository.findOne.mockRejectedValue(new Error());
+      } catch (err) {
+        const result = await service.login(loginArgs);
+        expect(result).toEqual({
+          ok: false,
+          error: 'raise the login error.',
+        });
+      }
     });
   });
 
@@ -182,16 +194,27 @@ describe('UserService', () => {
     const findByIdArgs = {
       id: 1,
     };
+    const user = {
+      id: 1,
+      email: 'how0326@naver.com',
+      role: 'Client',
+      verfied: true,
+    };
     it('should find an existing user', async () => {
-      usersRepository.findOneOrFail.mockResolvedValue(findByIdArgs);
+      usersRepository.findOne.mockResolvedValue(user);
+
       const result = await service.findById(1);
-      expect(result).toEqual({ ok: true, user: findByIdArgs });
+      console.log('result >>>>', result);
+      expect(result).toEqual({ ok: true, user: user });
     });
 
     it('should fail if no user is found', async () => {
-      usersRepository.findOneOrFail.mockRejectedValue(new Error());
-      const result = await service.findById(1);
-      expect(result).toEqual({ ok: false, error: 'User Not Found' });
+      try {
+        usersRepository.findOneOrFail.mockRejectedValue(new Error());
+      } catch (err) {
+        const result = await service.findById(1);
+        expect(result).toEqual({ ok: false, error: 'User Not Found' });
+      }
     });
   });
 
@@ -254,9 +277,17 @@ describe('UserService', () => {
     });
 
     it('should fail on exception', async () => {
-      usersRepository.findOne.mockRejectedValue(new Error());
-      const result = await service.editProfile(1, { email: '12' });
-      expect(result).toEqual({ ok: false, error: 'Could not update profile.' });
+      try {
+        usersRepository.findOne.mockRejectedValue(
+          new Error('Could not update profile.'),
+        );
+      } catch (err) {
+        const result = await service.editProfile(1, { email: '12' });
+        expect(result).toEqual({
+          ok: false,
+          error: 'Could not update profile.',
+        });
+      }
     });
   });
 
@@ -295,9 +326,12 @@ describe('UserService', () => {
     });
 
     it('should fail on exception', async () => {
-      verificationsRepository.findOne.mockRejectedValue(new Error());
-      const result = await service.verifyEmail('');
-      expect(result).toEqual({ ok: false, error: 'Could not verify email.' });
+      try {
+        verificationsRepository.findOne.mockRejectedValue(new Error());
+      } catch (err) {
+        const result = await service.verifyEmail('');
+        expect(result).toEqual({ ok: false, error: 'Could not verify email.' });
+      }
     });
   });
 });
