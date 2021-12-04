@@ -10,10 +10,8 @@ export class JwtService {
   // @Inject 를 사용하여 module 에서 무언가를 inject 할 수 있다.
   constructor(
     @Inject(CONFIG_OPTIONS) private readonly options: JwtModuleOptions,
-    private readonly configService: ConfigService,
   ) {
     console.log(options);
-    console.log(configService.get('SECRET_KEY'));
   }
 
   // const token = this.jwtService.sign({id: user.id})

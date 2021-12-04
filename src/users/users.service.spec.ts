@@ -191,9 +191,6 @@ describe('UserService', () => {
   });
 
   describe('findById', () => {
-    const findByIdArgs = {
-      id: 1,
-    };
     const user = {
       id: 1,
       email: 'how0326@naver.com',
@@ -204,7 +201,6 @@ describe('UserService', () => {
       usersRepository.findOne.mockResolvedValue(user);
 
       const result = await service.findById(1);
-      console.log('result >>>>', result);
       expect(result).toEqual({ ok: true, user: user });
     });
 
