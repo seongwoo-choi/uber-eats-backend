@@ -2,7 +2,6 @@ import { Inject, Injectable } from '@nestjs/common';
 import { JwtModuleOptions } from './jwt.interfaces';
 import { CONFIG_OPTIONS } from '../common/common.constant';
 import * as jwt from 'jsonwebtoken';
-import { ConfigService } from '@nestjs/config';
 
 // 기본적으로 ConfigService 랑 같은 형식이 될 것이다.
 @Injectable()

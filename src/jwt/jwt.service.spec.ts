@@ -1,6 +1,13 @@
 import { JwtService } from './jwt.service';
 import { Test } from '@nestjs/testing';
 import { CONFIG_OPTIONS } from '../common/common.constant';
+import * as jwt from 'jsonwebtoken';
+
+jest.mock('jsonwebtoken', () => {
+  return {
+    sign: jest.fn(() => 'TOKEN'),
+  };
+});
 
 const TEST_KEY = 'testKey';
 
@@ -24,8 +31,18 @@ describe('JwtService', () => {
   });
 
   // sign 이 호출된 횟수를 체크, 반환값을 mock
-  it.todo('sign', () => {});
+  describe('sign', () => {
+    it('should return a signed token', () => {
+      const ID = 1;
+      const token = service.sign(ID);
+      expect(typeof token).toBe('string');
+      expect(jwt.sign).toHaveBeenCalledTimes(1);
+      expect(jwt.sign).toHaveBeenLastCalledWith({ id: ID }, TEST_KEY);
+    });
+  });
 
   // verify 가 호출된 횟수를 체크, 반환값을 mock
-  it.todo('login', () => {});
+  describe('verify', () => {
+    it('should return the decoded token', () => {});
+  });
 });
