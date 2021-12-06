@@ -29,7 +29,7 @@ export class MailService {
     // to: string,
     template: string,
     emailVars: EmailVar[],
-  ) {
+  ): Promise<boolean> {
     const form = new FormData();
     // -F from='Excited User <mailgun@YOUR_DOMAIN_NAME>' \
     form.append('from', `hibogo789@gmail.com <mailgun@${this.options.domain}>`);
