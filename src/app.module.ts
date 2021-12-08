@@ -37,7 +37,7 @@ console.log(process.env.NODE_ENV);
       // 환경변수 파일에 대한 유효성 검사를 실시
       validationSchema: Joi.object({
         // required() => 필수값
-        NODE_ENV: Joi.string().valid('dev', 'prod').required(),
+        NODE_ENV: Joi.string().valid('dev', 'prod', 'test').required(),
         DB_PORT: Joi.number().required(),
         DB_HOST: Joi.string().required(),
         DB_USERNAME: Joi.string().required(),
@@ -64,7 +64,8 @@ console.log(process.env.NODE_ENV);
       // graphQL 에서 사용하는 스키마를 자동으로 생성해주고 DB 에도 자동으로 즉시 반영해준다.
       synchronize: process.env.NODE_ENV !== 'prod',
       // 데이터베이스에서 무슨 일이 일어나는지 콘솔에 표시
-      logging: true,
+      logging:
+        process.env.NODE_ENV !== 'prod' && process.env.NODE_ENV !== 'test',
       // TypeORM 이 DB 에 Restaurant entity 를 테이블 수 있도록 등록
       entities: [User, Verification],
     }),
