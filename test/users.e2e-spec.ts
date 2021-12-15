@@ -5,6 +5,12 @@ import { AppModule } from './../src/app.module';
 import { getConnection } from 'typeorm';
 import exp from 'constants';
 
+jest.mock('got', () => {
+  return {
+    post: jest.fn(),
+  };
+});
+
 const GRAPHQL_ENDPOINT = '/graphql';
 
 describe('UserModule (e2e)', () => {
@@ -49,6 +55,32 @@ describe('UserModule (e2e)', () => {
           console.log(res.body);
           expect(res.body.data.createAccount.ok).toBe('true');
           expect(res.body.data.createAccount.error).toBe(null);
+        });
+    });
+
+    it('should fail if account already exists', () => {
+      return request(app.getHttpServer())
+        .post(GRAPHQL_ENDPOINT)
+        .send({
+          query: `
+          mutation {
+            createAccount(input: {
+              email: "${EMAIL}",
+              password: "1234",
+              role: Owner
+            }) {
+              ok
+              error
+            }
+          }`,
+        })
+        .expect(200)
+        .expect((res) => {
+          console.log(res.body);
+          expect(res.body.data.createAccount.ok).toBe('false');
+          expect(res.body.data.createAccount.error).toBe(
+            '이미 존재하는 이메일입니다.',
+          );
         });
     });
   });
