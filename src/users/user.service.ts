@@ -213,9 +213,6 @@ export class UsersService {
             }),
           );
           await this.verificationRepository.save(newVerification);
-          // console.log('no user.verification >>>> ', user);
-          // console.log('newVerification >>>>> ', newVerification);
-          // console.log('user.verification >>>>> ', user.verification);
 
           this.mailService.sendVerificationEmail(
             user.email,
@@ -225,7 +222,6 @@ export class UsersService {
         return { ok: true };
       }
     } catch (error) {
-      console.log('error >>>>>', error);
       return {
         ok: false,
         error: '유저가 업데이트 되지 않았습니다.',
