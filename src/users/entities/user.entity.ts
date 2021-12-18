@@ -8,7 +8,7 @@ import {
 import { CoreEntity } from '../../common/entities/core.entity';
 import * as bcrypt from 'bcrypt';
 import { InternalServerErrorException } from '@nestjs/common';
-import { IsEmail, IsEnum, IsString } from 'class-validator';
+import { IsBoolean, IsEmail, IsEnum, IsString } from 'class-validator';
 import { Verification } from './verification.entity';
 
 // UserRole.Owner => 1 이 되고 DB 에 저장이 된다.
@@ -34,6 +34,7 @@ export class User extends CoreEntity {
   // beforeInsert 로 인해 해시화 된 비밀번호가 또 해시화 되서 DB 에 저장되는 것을 방지하기 위해 select: false 를 사용
   @Field((type) => String)
   @Column({ select: false })
+  @IsString()
   password: string;
 
   // graphql, db 에서 enum 타입을 사용할 수 있도록 상기 작업들이 필요
@@ -47,6 +48,7 @@ export class User extends CoreEntity {
 
   @Column({ default: false })
   @Field((type) => Boolean)
+  @IsBoolean()
   verified: boolean;
 
   @Field((type) => Verification)
