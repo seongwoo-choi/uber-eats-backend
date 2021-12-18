@@ -1,4 +1,11 @@
-import { BeforeInsert, BeforeUpdate, Column, Entity, OneToOne } from 'typeorm';
+import {
+  BeforeInsert,
+  BeforeUpdate,
+  Column,
+  Entity,
+  OneToMany,
+  OneToOne,
+} from 'typeorm';
 import {
   Field,
   InputType,
@@ -10,6 +17,7 @@ import * as bcrypt from 'bcrypt';
 import { InternalServerErrorException } from '@nestjs/common';
 import { IsBoolean, IsEmail, IsEnum, IsString } from 'class-validator';
 import { Verification } from './verification.entity';
+import { Restaurant } from '../../restaurants/entities/restaurant.entity';
 
 // UserRole.Owner => 1 이 되고 DB 에 저장이 된다.
 enum UserRole {
@@ -22,7 +30,7 @@ enum UserRole {
 // UserRole 이넘 타입을 name 이 UserRole 이라는 이름으로 등록, Field 에서 사용할 수 있도록 함
 registerEnumType(UserRole, { name: 'UserRole' });
 
-@InputType({ isAbstract: true })
+@InputType('UserInputType', { isAbstract: true })
 @Entity()
 @ObjectType()
 export class User extends CoreEntity {
@@ -54,6 +62,10 @@ export class User extends CoreEntity {
   @Field((type) => Verification)
   @OneToOne((type) => Verification, (verification) => verification.user)
   verification: Verification;
+
+  @Field(() => [Restaurant])
+  @OneToMany(() => Restaurant, (restaurant) => restaurant.owner)
+  restaurants: Restaurant[];
 
   // DB 에 저장하기 전, 즉 Service 에서 this.userRepository.save(this.userRepository.create()) 메서드가 실행하기 전에 아래 메서드가 실행된다.
   // 해당 인스턴스의 password 를 받아서 해시한다.
