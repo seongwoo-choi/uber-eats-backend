@@ -7,18 +7,15 @@ import {
 import { RestaurantService } from './restaurant.service';
 import { AuthUser } from '../auth/auth-user.decorator';
 import { User } from '../users/entities/user.entity';
-import { UseGuards } from '@nestjs/common';
+import { Role } from '../auth/role.decorator';
 
-// of 는 아무런 의미가 없는 값이다
-// 해당 리졸버는 레스토랑의 리졸버가 됐다.
-// 꼭 필요한 것은 아니다. @Resolver() 이렇게 사용해도 된다.
-@Resolver((of) => Restaurant)
+@Resolver(() => Restaurant)
 export class RestaurantsResolver {
-  // restaurant service 를 DI 받는다.
+  // restaurant service 를 DI 받는다
   constructor(private readonly restaurantService: RestaurantService) {}
 
-  @UseGuards()
   @Mutation(() => CreateRestaurantOutput)
+  @Role(['Owner'])
   async createRestaurant(
     @AuthUser() authUser: User,
     @Args('input') createRestaurantInput: CreateRestaurantInput,

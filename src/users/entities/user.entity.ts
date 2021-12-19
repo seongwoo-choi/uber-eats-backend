@@ -20,10 +20,10 @@ import { Verification } from './verification.entity';
 import { Restaurant } from '../../restaurants/entities/restaurant.entity';
 
 // UserRole.Owner => 1 이 되고 DB 에 저장이 된다.
-enum UserRole {
-  'Client',
-  'Owner',
-  'Delivery',
+export enum UserRole {
+  Client = 'Client',
+  Owner = 'Owner',
+  Delivery = 'Delivery',
 }
 
 // graphql enum 타입 추가를 위한 작업
