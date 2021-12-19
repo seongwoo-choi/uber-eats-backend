@@ -9,15 +9,19 @@ import { Restaurant } from './restaurant.entity';
 @Entity() // for typeorm
 export class Category extends CoreEntity {
   @Field(() => String)
-  @Column()
+  @Column({ unique: true })
   @IsString()
-  @Length(5, 10)
   name: string;
 
-  @Field(() => String)
-  @Column()
+  @Field(() => String, { nullable: true })
+  @Column({ nullable: true })
   @IsString()
   coverImage: string;
+
+  @Field(() => String)
+  @Column({ unique: true })
+  @IsString()
+  slug: string;
 
   // 레스토랑과 1:N 관계를 갖는다.
   // 하나의 카테고리가 여러개의 레스토랑을 갖는다.

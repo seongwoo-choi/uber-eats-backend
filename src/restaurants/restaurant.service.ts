@@ -7,6 +7,7 @@ import {
   CreateRestaurantOutput,
 } from './dto/create-restaurant.dto';
 import { User } from '../users/entities/user.entity';
+import { Category } from './entities/category.entity';
 
 @Injectable()
 export class RestaurantService {
@@ -15,6 +16,8 @@ export class RestaurantService {
   constructor(
     @InjectRepository(Restaurant)
     private readonly restaurantRepository: Repository<Restaurant>,
+    @InjectRepository(Category)
+    private readonly categoryRepository: Repository<Category>,
   ) {}
 
   // create 와 save 의 차이점
@@ -26,7 +29,35 @@ export class RestaurantService {
       const newRestaurant = this.restaurantRepository.create(
         createRestaurantInput,
       );
+      newRestaurant.owner = owner;
+
+      // trim 을 사용해서 문자 앞 뒤의 띄어쓰기 제거
+      // toLowerCase 을 사용해서 모든 문자 소문자로 변경
+      const categoryName = createRestaurantInput.categoryName
+        .trim()
+        .toLowerCase();
+
+      // 정규 표현식을 사용해서 띄어쓰기 부분을 - 으로 대체한다.
+      const categorySlug = categoryName.replace(/ /g, '-');
+
+      let category = await this.categoryRepository.findOne({
+        slug: categorySlug,
+      });
+
+      if (!category) {
+        category = await this.categoryRepository.save(
+          this.categoryRepository.create({
+            slug: categorySlug,
+            name: categoryName,
+            coverImage: '',
+          }),
+        );
+      }
+
+      newRestaurant.category = category;
+
       await this.restaurantRepository.save(newRestaurant);
+
       return {
         ok: true,
       };
