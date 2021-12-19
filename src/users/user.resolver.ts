@@ -6,45 +6,44 @@ import {
   CreateAccountOutput,
 } from './dto/create-account.dto';
 import { LoginInput, LoginOutput } from './dto/login.dto';
-import { AuthGuard } from '../auth/auth.guard';
-import { UseGuards } from '@nestjs/common';
 import { AuthUser } from '../auth/auth-user.decorator';
 import { UserProfileInput, UserProfileOutput } from './dto/user-profile.dto';
 import { EditProfileInput, EditProfileOutput } from './dto/edit-profile.dto';
 import { VerifyEmailInput, VerifyEmailOutput } from './dto/verify-email.dto';
+import { Role } from '../auth/role.decorator';
 
-@Resolver((of) => User)
+@Resolver(() => User)
 export class UsersResolver {
   constructor(private readonly usersService: UsersService) {}
 
-  @Mutation((returns) => CreateAccountOutput)
+  @Mutation(() => CreateAccountOutput)
   async createAccount(
     @Args('input') createAccountInput: CreateAccountInput,
   ): Promise<CreateAccountOutput> {
     return this.usersService.createAccount(createAccountInput);
   }
 
-  @Mutation((returns) => LoginOutput)
+  @Mutation(() => LoginOutput)
   async login(@Args('input') loginInput: LoginInput): Promise<LoginOutput> {
     return this.usersService.login(loginInput);
   }
 
-  @Query((returns) => User)
-  @UseGuards(AuthGuard)
+  @Query(() => User)
+  @Role(['Any'])
   me(@AuthUser() authUser: User) {
     return authUser;
   }
 
-  @UseGuards(AuthGuard)
-  @Query((returns) => UserProfileOutput)
+  @Query(() => UserProfileOutput)
+  @Role(['Any'])
   async userProfile(
     @Args() userProfileInput: UserProfileInput,
   ): Promise<UserProfileOutput> {
     return this.usersService.findById(userProfileInput.userId);
   }
 
-  @UseGuards(AuthGuard)
-  @Mutation((returns) => EditProfileOutput)
+  @Mutation(() => EditProfileOutput)
+  @Role(['Any'])
   async editProfile(
     @AuthUser() authUser: User,
     @Args('input') editProfileInput: EditProfileInput,
@@ -52,7 +51,7 @@ export class UsersResolver {
     return this.usersService.editProfile(authUser.id, editProfileInput);
   }
 
-  @Mutation((returns) => VerifyEmailOutput)
+  @Mutation(() => VerifyEmailOutput)
   verifyEmail(
     @Args('input') { code }: VerifyEmailInput,
   ): Promise<VerifyEmailOutput> {
