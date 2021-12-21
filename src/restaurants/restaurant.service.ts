@@ -13,7 +13,7 @@ import {
   EditRestaurantOutput,
 } from './dto/edit-restaurant.dto';
 
-console.log('rebase test, rebase 는 push 를 하지 않은 상태에서 하는 것인가?');
+console.log('rebase test, rebase 는 push 를 한 상태에서 할 수 있다.');
 
 @Injectable()
 export class RestaurantService {
