@@ -12,6 +12,7 @@ import {
   EditRestaurantInput,
   EditRestaurantOutput,
 } from './dto/edit-restaurant.dto';
+import { CategoryRepository } from './repositories/category.repository';
 
 @Injectable()
 export class RestaurantService {
@@ -20,33 +21,8 @@ export class RestaurantService {
   constructor(
     @InjectRepository(Restaurant)
     private readonly restaurantRepository: Repository<Restaurant>,
-    @InjectRepository(Category)
-    private readonly categoryRepository: Repository<Category>,
+    private readonly categoryRepository: CategoryRepository,
   ) {}
-
-  async getOrCreateCategory(name: string): Promise<Category> {
-    // trim 을 사용해서 문자 앞 뒤의 띄어쓰기 제거
-    // toLowerCase 을 사용해서 모든 문자 소문자로 변경
-    const categoryName = name.trim().toLowerCase();
-
-    // 정규 표현식을 사용해서 띄어쓰기 부분을 - 으로 대체한다.
-    const categorySlug = categoryName.replace(/ /g, '-');
-
-    let category = await this.categoryRepository.findOne({
-      slug: categorySlug,
-    });
-
-    if (!category) {
-      category = await this.categoryRepository.save(
-        this.categoryRepository.create({
-          slug: categorySlug,
-          name: categoryName,
-          coverImage: 'https://',
-        }),
-      );
-    }
-    return category;
-  }
 
   // create 와 save 의 차이점
   async createRestaurant(
@@ -59,7 +35,7 @@ export class RestaurantService {
       );
       newRestaurant.owner = owner;
 
-      newRestaurant.category = await this.getOrCreateCategory(
+      newRestaurant.category = await this.categoryRepository.getOrCreate(
         createRestaurantInput.categoryName,
       );
 
@@ -102,7 +78,21 @@ export class RestaurantService {
         };
       }
 
-      // 위 로직에서 레스토랑의 오너임을 인증
+      let category: Category = null;
+
+      if (editRestaurantInput.categoryName) {
+        category = await this.categoryRepository.getOrCreate(
+          editRestaurantInput.categoryName,
+        );
+      }
+      await this.restaurantRepository.save([
+        {
+          id: editRestaurantInput.restaurantId,
+          ...editRestaurantInput,
+          // category 가 존재하면 category 가 category 인 object 를 리턴
+          ...(category && { category }),
+        },
+      ]);
 
       return {
         ok: true,
