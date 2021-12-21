@@ -8,7 +8,12 @@ import {
 } from './dto/create-restaurant.dto';
 import { User } from '../users/entities/user.entity';
 import { Category } from './entities/category.entity';
-import { EditRestaurantInput, EditRestaurantOutput } from './dto/edit-restaurant.dto';
+import {
+  EditRestaurantInput,
+  EditRestaurantOutput,
+} from './dto/edit-restaurant.dto';
+
+console.log('rebase test, rebase 는 push 를 하지 않은 상태에서 하는 것인가?');
 
 @Injectable()
 export class RestaurantService {
