@@ -1,5 +1,5 @@
 import { Field, InputType, ObjectType } from '@nestjs/graphql';
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, RelationId } from 'typeorm';
 import { IsString, Length } from 'class-validator';
 import { CoreEntity } from '../../common/entities/core.entity';
 import { Category } from './category.entity';
@@ -17,7 +17,7 @@ export class Restaurant extends CoreEntity {
   @Length(5, 10)
   name: string;
 
-  @Field(() => String, { defaultValue: 'default value' })
+  @Field(() => String, { defaultValue: '서울시 강남구' })
   @Column()
   @IsString()
   address: string;
@@ -44,4 +44,7 @@ export class Restaurant extends CoreEntity {
   })
   @JoinColumn({ name: 'owner_id' })
   owner: User;
+
+  @RelationId((restaurant: Restaurant) => restaurant.owner)
+  ownerId: number;
 }
