@@ -13,8 +13,6 @@ import {
   EditRestaurantOutput,
 } from './dto/edit-restaurant.dto';
 
-console.log('rebase test, rebase 는 push 를 한 상태에서 할 수 있다.');
-
 @Injectable()
 export class RestaurantService {
   // @Module() imports 에 TypeOrmModule.forFeature([엔티티 클래스, 엔티티 클래스]) => 레포지토리 작성 가능
