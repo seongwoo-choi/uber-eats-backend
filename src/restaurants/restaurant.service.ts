@@ -13,6 +13,8 @@ import {
   EditRestaurantOutput,
 } from './dto/edit-restaurant.dto';
 
+console.log('master 브랜치가 rebase 하려하는 브랜치보다 위에 있을 경우');
+
 @Injectable()
 export class RestaurantService {
   // @Module() imports 에 TypeOrmModule.forFeature([엔티티 클래스, 엔티티 클래스]) => 레포지토리 작성 가능
