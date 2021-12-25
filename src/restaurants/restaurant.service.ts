@@ -86,7 +86,6 @@ export class RestaurantService {
         );
       }
 
-
       // save 에서 id 를 보내지 않는 경우 -> 새로운 entity 를 생성하는 작업을 한다.
       // update 를 위해서라도 save 를 할 시에 꼭 id 를 보내줘야 한다.
       // 그래야 TypeORM 이 해당 entity 를 찾아 update 해준다.
