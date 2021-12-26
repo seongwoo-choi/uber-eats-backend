@@ -13,6 +13,10 @@ import {
   EditRestaurantOutput,
 } from './dto/edit-restaurant.dto';
 import { CategoryRepository } from './repositories/category.repository';
+import {
+  DeleteRestaurantInput,
+  DeleteRestaurantOutput,
+} from './dto/delete-restaurant.dto';
 
 @Injectable()
 export class RestaurantService {
@@ -97,6 +101,44 @@ export class RestaurantService {
           ...(category && { category }),
         },
       ]);
+
+      return {
+        ok: true,
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error,
+      };
+    }
+  }
+
+  async deleteRestaurant(
+    owner: User,
+    id: number,
+  ): Promise<DeleteRestaurantOutput> {
+    try {
+      const restaurant = await this.restaurantRepository.findOne({
+        id,
+      });
+
+      if (!restaurant) {
+        return {
+          ok: false,
+          error: '삭제하고자 하는 레스토랑이 존재하지 않습니다.',
+        };
+      }
+
+      if (owner.id !== restaurant.ownerId) {
+        return {
+          ok: false,
+          error: '삭제 권한이 없는 유저입니다.',
+        };
+      }
+
+      await this.restaurantRepository.delete({
+        id,
+      });
 
       return {
         ok: true,
