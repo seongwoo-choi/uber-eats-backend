@@ -17,6 +17,7 @@ import {
   DeleteRestaurantInput,
   DeleteRestaurantOutput,
 } from './dto/delete-restaurant.dto';
+import { AllCategoriesOutput } from './dto/all-categories.dto';
 
 @Injectable()
 export class RestaurantService {
@@ -149,5 +150,24 @@ export class RestaurantService {
         error,
       };
     }
+  }
+
+  async allCategories(): Promise<AllCategoriesOutput> {
+    try {
+      const categories = await this.categoryRepository.find();
+      return {
+        ok: true,
+        categories,
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error: '카테고리를 찾지 못했습니다.',
+      };
+    }
+  }
+
+  countRestaurant(category: Category) {
+    return this.restaurantRepository.count({ category });
   }
 }
