@@ -18,6 +18,7 @@ import {
   DeleteRestaurantOutput,
 } from './dto/delete-restaurant.dto';
 import { AllCategoriesOutput } from './dto/all-categories.dto';
+import { CategoryInput, CategoryOutput } from './dto/category.dto';
 
 @Injectable()
 export class RestaurantService {
@@ -169,5 +170,31 @@ export class RestaurantService {
 
   countRestaurant(category: Category) {
     return this.restaurantRepository.count({ category });
+  }
+
+  async findCategoryBySlug(
+    categoryInput: CategoryInput,
+  ): Promise<CategoryOutput> {
+    try {
+      const category = await this.categoryRepository.findOne(
+        { slug: categoryInput.slug },
+        { relations: ['restaurants'] },
+      );
+      if (!category) {
+        return {
+          ok: false,
+          error: '해당하는 카테고리는 존재하지 않습니다.',
+        };
+      }
+      return {
+        ok: true,
+        category,
+      };
+    } catch {
+      return {
+        ok: false,
+        error: '카테고리 목록을 불러올 수 없습니다.',
+      };
+    }
   }
 }
