@@ -176,19 +176,33 @@ export class RestaurantService {
     categoryInput: CategoryInput,
   ): Promise<CategoryOutput> {
     try {
-      const category = await this.categoryRepository.findOne(
-        { slug: categoryInput.slug },
-        { relations: ['restaurants'] },
-      );
+      const category = await this.categoryRepository.findOne({
+        slug: categoryInput.slug,
+      });
+
       if (!category) {
         return {
           ok: false,
           error: '해당하는 카테고리는 존재하지 않습니다.',
         };
       }
+
+      const restaurants = await this.restaurantRepository.find({
+        where: {
+          category: category,
+        },
+        take: 25,
+        skip: (categoryInput.page - 1) * 25,
+      });
+
+      category.restaurants = restaurants;
+
+      const totalResults = await this.countRestaurant(category);
+
       return {
         ok: true,
         category,
+        totalPage: Math.ceil(totalResults / 25),
       };
     } catch {
       return {
