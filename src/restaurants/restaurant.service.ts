@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Restaurant } from './entities/restaurant.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import {
   CreateRestaurantInput,
   CreateRestaurantOutput,
@@ -20,14 +20,19 @@ import {
 import { AllCategoriesOutput } from './dto/all-categories.dto';
 import { CategoryInput, CategoryOutput } from './dto/category.dto';
 import { RestaurantsInput, RestaurantsOutput } from './dto/restaurants.dto';
+import { RestaurantInput, RestaurantOutput } from './dto/restaurnat.dto';
+import {
+  SearchRestaurantInput,
+  SearchRestaurantOutput,
+} from './dto/search-restaurant.dto';
+import { RestaurantRepository } from './repositories/restaurant.repository';
 
 @Injectable()
 export class RestaurantService {
   // @Module() imports 에 TypeOrmModule.forFeature([엔티티 클래스, 엔티티 클래스]) => 레포지토리 작성 가능
   // restaurant entity 의 repository 를 inject 하고 있다.
   constructor(
-    @InjectRepository(Restaurant)
-    private readonly restaurantRepository: Repository<Restaurant>,
+    private readonly restaurantRepository: RestaurantRepository,
     private readonly categoryRepository: CategoryRepository,
   ) {}
 
@@ -188,23 +193,10 @@ export class RestaurantService {
         };
       }
 
-      const restaurants = await this.restaurantRepository.find({
-        where: {
-          category: category,
-        },
-        take: 25,
-        skip: (categoryInput.page - 1) * 25,
-      });
-
-      category.restaurants = restaurants;
-
-      const totalResults = await this.countRestaurant(category);
-
-      return {
-        ok: true,
+      return this.restaurantRepository.categoryBySlugPagination(
         category,
-        totalPage: Math.ceil(totalResults / 25),
-      };
+        categoryInput,
+      );
     } catch {
       return {
         ok: false,
@@ -213,15 +205,30 @@ export class RestaurantService {
     }
   }
 
-  async allRestaurants({ page }: RestaurantsInput): Promise<RestaurantsOutput> {
+  async allRestaurants(
+    restaurantsInput: RestaurantsInput,
+  ): Promise<RestaurantsOutput> {
     try {
-      const [restaurants, totalResults] =
-        await this.restaurantRepository.findAndCount({
-          take: 25,
-          skip: (page - 1) * 25,
-        });
+      return this.restaurantRepository.allRestaurantsPagination(
+        restaurantsInput,
+      );
+    } catch {
+      return {
+        ok: false,
+        error: '해당하는 식당을 찾을 수 없습니다.',
+      };
+    }
+  }
 
-      if (!restaurants) {
+  async findRestaurantById({
+    restaurantId,
+  }: RestaurantInput): Promise<RestaurantOutput> {
+    try {
+      const restaurant = await this.restaurantRepository.findOne({
+        id: restaurantId,
+      });
+
+      if (!restaurant) {
         return {
           ok: false,
           error: '해당하는 식당은 존재하지 않습니다.',
@@ -230,13 +237,25 @@ export class RestaurantService {
 
       return {
         ok: true,
-        totalPage: Math.ceil(totalResults / 25),
-        results: restaurants,
+        restaurant,
       };
     } catch {
       return {
         ok: false,
-        error: '해당하는 식당을 찾을 수 없습니다.',
+        error: '해당하는 식당은 존재하지 않습니다.',
+      };
+    }
+  }
+
+  async searchRestaurantByName(
+    searchRestaurantInput: SearchRestaurantInput,
+  ): Promise<SearchRestaurantOutput> {
+    try {
+      return this.restaurantRepository.searchPagination(searchRestaurantInput);
+    } catch {
+      return {
+        ok: false,
+        error: '해당하는 식당을 찾는 도중 오류가 발생했습니다.',
       };
     }
   }
