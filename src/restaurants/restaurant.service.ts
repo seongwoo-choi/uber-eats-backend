@@ -19,6 +19,7 @@ import {
 } from './dto/delete-restaurant.dto';
 import { AllCategoriesOutput } from './dto/all-categories.dto';
 import { CategoryInput, CategoryOutput } from './dto/category.dto';
+import { RestaurantsInput, RestaurantsOutput } from './dto/restaurants.dto';
 
 @Injectable()
 export class RestaurantService {
@@ -208,6 +209,34 @@ export class RestaurantService {
       return {
         ok: false,
         error: '카테고리 목록을 불러올 수 없습니다.',
+      };
+    }
+  }
+
+  async allRestaurants({ page }: RestaurantsInput): Promise<RestaurantsOutput> {
+    try {
+      const [restaurants, totalResults] =
+        await this.restaurantRepository.findAndCount({
+          take: 25,
+          skip: (page - 1) * 25,
+        });
+
+      if (!restaurants) {
+        return {
+          ok: false,
+          error: '해당하는 식당은 존재하지 않습니다.',
+        };
+      }
+
+      return {
+        ok: true,
+        totalPage: Math.ceil(totalResults / 25),
+        results: restaurants,
+      };
+    } catch {
+      return {
+        ok: false,
+        error: '해당하는 식당을 찾을 수 없습니다.',
       };
     }
   }

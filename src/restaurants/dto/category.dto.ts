@@ -13,7 +13,6 @@ export class CategoryInput extends PaginationInput {
 
 @ObjectType()
 export class CategoryOutput extends PaginationOutput {
-
   @Field(() => Category, { nullable: true })
   category?: Category;
 }
