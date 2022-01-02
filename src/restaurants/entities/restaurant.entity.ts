@@ -1,9 +1,17 @@
 import { Field, InputType, ObjectType } from '@nestjs/graphql';
-import { Column, Entity, JoinColumn, ManyToOne, RelationId } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  RelationId,
+} from 'typeorm';
 import { IsString, Length } from 'class-validator';
 import { CoreEntity } from '../../common/entities/core.entity';
 import { Category } from './category.entity';
 import { User } from '../../users/entities/user.entity';
+import { Dish } from './dish.entity';
 
 // InputType, ObjectType, ArgumentType 모두 GraphQL 내부에서 사용될 타입을 지정해주는 어노테이션
 // GraphQL 을 위한 Restaurant 의 ObjectType 생성, 자동으로 스키마를 생성되게 해준다.
@@ -46,4 +54,8 @@ export class Restaurant extends CoreEntity {
 
   @RelationId((restaurant: Restaurant) => restaurant.owner)
   ownerId: number;
+
+  @Field(() => [Dish])
+  @OneToMany(() => Dish, (menu) => menu.restaurant)
+  menu: Dish[];
 }

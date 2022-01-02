@@ -1,7 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { Restaurant } from './entities/restaurant.entity';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Like, Repository } from 'typeorm';
 import {
   CreateRestaurantInput,
   CreateRestaurantOutput,
@@ -13,10 +10,7 @@ import {
   EditRestaurantOutput,
 } from './dto/edit-restaurant.dto';
 import { CategoryRepository } from './repositories/category.repository';
-import {
-  DeleteRestaurantInput,
-  DeleteRestaurantOutput,
-} from './dto/delete-restaurant.dto';
+import { DeleteRestaurantOutput } from './dto/delete-restaurant.dto';
 import { AllCategoriesOutput } from './dto/all-categories.dto';
 import { CategoryInput, CategoryOutput } from './dto/category.dto';
 import { RestaurantsInput, RestaurantsOutput } from './dto/restaurants.dto';
