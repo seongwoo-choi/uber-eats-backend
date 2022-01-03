@@ -20,12 +20,18 @@ import {
   SearchRestaurantOutput,
 } from './dto/search-restaurant.dto';
 import { RestaurantRepository } from './repositories/restaurant.repository';
+import { CreateDishInput } from './dto/create-dish.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Dish } from './entities/dish.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class RestaurantService {
   // @Module() imports 에 TypeOrmModule.forFeature([엔티티 클래스, 엔티티 클래스]) => 레포지토리 작성 가능
   // restaurant entity 의 repository 를 inject 하고 있다.
   constructor(
+    @InjectRepository(Dish)
+    private readonly dishRepository: Repository<Dish>,
     private readonly restaurantRepository: RestaurantRepository,
     private readonly categoryRepository: CategoryRepository,
   ) {}
@@ -218,9 +224,13 @@ export class RestaurantService {
     restaurantId,
   }: RestaurantInput): Promise<RestaurantOutput> {
     try {
-      const restaurant = await this.restaurantRepository.findOne({
-        id: restaurantId,
-      });
+      // restaurant 의 세부사항으로 menu 를 확인할 수 있도록 함
+      const restaurant = await this.restaurantRepository.findOne(
+        {
+          id: restaurantId,
+        },
+        { relations: ['menu'] },
+      );
 
       if (!restaurant) {
         return {
@@ -250,6 +260,46 @@ export class RestaurantService {
       return {
         ok: false,
         error: '해당하는 식당을 찾는 도중 오류가 발생했습니다.',
+      };
+    }
+  }
+
+  async createDish(
+    owner: User,
+    createDishInput: CreateDishInput,
+  ): Promise<RestaurantOutput> {
+    try {
+      const restaurant = await this.restaurantRepository.findOne({
+        id: createDishInput.restaurantId,
+      });
+
+      if (!restaurant) {
+        return {
+          ok: false,
+          error: '해당하는 식당은 존재하지 않습니다.',
+        };
+      }
+
+      if (restaurant.ownerId != owner.id) {
+        return {
+          ok: false,
+          error: '메뉴 생성 권한이 없는 사용자입니다.',
+        };
+      }
+
+      const dish = await this.dishRepository.save(
+        this.dishRepository.create({ ...createDishInput, restaurant }),
+      );
+
+      console.log(dish);
+
+      return {
+        ok: true,
+      };
+    } catch {
+      return {
+        ok: false,
+        error: '메뉴 생성 실패',
       };
     }
   }
