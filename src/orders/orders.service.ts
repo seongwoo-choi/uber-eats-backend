@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Order } from './entities/order.entity';
+import { Order, OrderStatus } from './entities/order.entity';
 import { Repository } from 'typeorm';
 import { CreateOrderInput, CreateOrderOutput } from './dtos/create-order.dto';
 import { User, UserRole } from '../users/entities/user.entity';
@@ -9,6 +9,7 @@ import { OrderItem } from './entities/order-item.entity';
 import { Dish } from '../restaurants/entities/dish.entity';
 import { GetOrdersInput, GetOrdersOutput } from './dtos/get-orders.dto';
 import { GetOrderInput, GetOrderOutput } from './dtos/get-order.dto';
+import { EditOrderInput, EditOrderOutput } from './dtos/edit-order.dto';
 
 @Injectable()
 export class OrdersService {
@@ -145,6 +146,20 @@ export class OrdersService {
     }
   }
 
+  canSeeOrder(user: User, order: Order): boolean {
+    let canSee = true;
+    if (user.role === UserRole.Client && order.customerId !== user.id) {
+      canSee = false;
+    }
+    if (user.role === UserRole.Delivery && order.driverId !== user.id) {
+      canSee = false;
+    }
+    if (user.role === UserRole.Owner && order.restaurant.ownerId !== user.id) {
+      canSee = false;
+    }
+    return canSee;
+  }
+
   async getOrder(user: User, { id }: GetOrderInput): Promise<GetOrderOutput> {
     try {
       const order = await this.orderRepository.findOne(id, {
@@ -158,34 +173,21 @@ export class OrdersService {
         };
       }
 
-      // let ok = true;
-      // if (user.role === UserRole.Client && order.customerId !== user.id) {
-      //   ok = false;
-      // }
-      // if (user.role === UserRole.Delivery && order.driverId !== user.id) {
-      //   ok = false;
-      // }
       // if (
-      //   user.role === UserRole.Owner &&
+      //   order.customerId !== user.id &&
+      //   order.driverId !== user.id &&
       //   order.restaurant.ownerId !== user.id
       // ) {
-      //   ok = false;
-      // }
-      // if (!ok) {
       //   return {
       //     ok: false,
       //     error: '권한이 없는 사용자입니다.',
       //   };
       // }
 
-      if (
-        order.customerId !== user.id &&
-        order.driverId !== user.id &&
-        order.restaurant.ownerId !== user.id
-      ) {
+      if (!this.canSeeOrder(user, order)) {
         return {
           ok: false,
-          error: '권한이 없는 사용자입니다.',
+          error: '수정 권한이 없는 사용자입니다.',
         };
       }
 
@@ -197,6 +199,75 @@ export class OrdersService {
       return {
         ok: false,
         error: '주문을 불러오는데 실패했습니다.',
+      };
+    }
+  }
+
+  async editOrder(
+    user: User,
+    { id: orderId, status }: EditOrderInput,
+  ): Promise<EditOrderOutput> {
+    try {
+      const order = await this.orderRepository.findOne(orderId, {
+        relations: ['restaurant'],
+      });
+      if (!order) {
+        return {
+          ok: false,
+          error: '해당하는 주문을 찾지 못했습니다.',
+        };
+      }
+
+      if (!this.canSeeOrder(user, order)) {
+        return {
+          ok: false,
+          error: '수정 권한이 없는 사용자입니다.',
+        };
+      }
+
+      // 주문을 수정할 수 있는 건 Owner 와 Delivery
+      // restaurant 가 order 를 받으면 order entity 의 status 는 Cooking
+      // restaurant => Cooked, Cooking
+      // Delivery => PickedUp, Delivered
+      // Owner 는 메뉴를 수정, Delivery 는 Status 를 수정
+
+      let canEdit = true;
+      if (user.role === UserRole.Client) {
+        canEdit = false;
+      }
+      if (user.role === UserRole.Owner) {
+        if (status !== OrderStatus.Cooking && status !== OrderStatus.Cooked) {
+          canEdit = false;
+        }
+      }
+      if (user.role === UserRole.Delivery) {
+        if (
+          status !== OrderStatus.PickedUp &&
+          status !== OrderStatus.Delivered
+        ) {
+          canEdit = false;
+        }
+      }
+
+      if (!canEdit) {
+        return {
+          ok: false,
+          error: '수정 권한이 없는 유저입니다.',
+        };
+      }
+
+      await this.orderRepository.save({
+        id: orderId,
+        status,
+      });
+
+      return {
+        ok: true,
+      };
+    } catch {
+      return {
+        ok: false,
+        error: '주문 수정에 실패했습니다.',
       };
     }
   }
