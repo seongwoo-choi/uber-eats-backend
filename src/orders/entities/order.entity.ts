@@ -6,7 +6,14 @@ import {
   ObjectType,
   registerEnumType,
 } from '@nestjs/graphql';
-import { Column, Entity, JoinTable, ManyToMany, ManyToOne } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+  RelationId,
+} from 'typeorm';
 import { CoreEntity } from '../../common/entities/core.entity';
 import { User } from '../../users/entities/user.entity';
 import { Restaurant } from '../../restaurants/entities/restaurant.entity';
@@ -62,4 +69,10 @@ export class Order extends CoreEntity {
   @Field(() => OrderStatus)
   @IsEnum(OrderStatus)
   status: OrderStatus;
+
+  @RelationId((order: Order) => order.customer)
+  customerId: number;
+
+  @RelationId((order: Order) => order.driver)
+  driverId: number;
 }
