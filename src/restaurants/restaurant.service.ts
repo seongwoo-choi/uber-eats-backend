@@ -24,6 +24,8 @@ import { CreateDishInput } from './dto/create-dish.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Dish } from './entities/dish.entity';
 import { Repository } from 'typeorm';
+import { EditDishInput, EditDishOutput } from './dto/edit-dish.dto';
+import { DeleteDishInput } from './dto/delete-dish.dto';
 
 @Injectable()
 export class RestaurantService {
@@ -287,11 +289,9 @@ export class RestaurantService {
         };
       }
 
-      const dish = await this.dishRepository.save(
+      await this.dishRepository.save(
         this.dishRepository.create({ ...createDishInput, restaurant }),
       );
-
-      console.log(dish);
 
       return {
         ok: true,
@@ -300,6 +300,78 @@ export class RestaurantService {
       return {
         ok: false,
         error: '메뉴 생성 실패',
+      };
+    }
+  }
+
+  async editDish(
+    owner: User,
+    editDishInput: EditDishInput,
+  ): Promise<EditDishOutput> {
+    try {
+      const dish = await this.dishRepository.findOne(editDishInput.dishId, {
+        relations: ['restaurant'],
+      });
+      if (!dish) {
+        return {
+          ok: false,
+          error: '수정하려는 메뉴가 존재하지 않습니다.',
+        };
+      }
+      if (dish.restaurant.ownerId !== owner.id) {
+        return {
+          ok: false,
+          error: '수정 권한이 없는 사용자입니다.',
+        };
+      }
+
+      // 배열 객체로 save 를 하면 update 가 실행된다.
+      // id 와 수정하려는 객체를 넘겨주면 update 가 된다.
+      await this.dishRepository.save([
+        {
+          id: editDishInput.dishId,
+          ...editDishInput,
+        },
+      ]);
+
+      return {
+        ok: true,
+      };
+    } catch {
+      return {
+        ok: false,
+        error: '메뉴 수정 실패',
+      };
+    }
+  }
+
+  async deleteDish(owner: User, { dishId }: DeleteDishInput) {
+    try {
+      const dish = await this.dishRepository.findOne(dishId, {
+        relations: ['restaurant'],
+      });
+      if (!dish) {
+        return {
+          ok: false,
+          error: '삭제하려는 메뉴가 존재하지 않습니다.',
+        };
+      }
+      if (dish.restaurant.ownerId !== owner.id) {
+        return {
+          ok: false,
+          error: '삭제 권한이 없는 유저입니다.',
+        };
+      }
+
+      await this.dishRepository.delete(dishId);
+
+      return {
+        ok: true,
+      };
+    } catch {
+      return {
+        ok: false,
+        error: '메뉴 삭제 실패',
       };
     }
   }
