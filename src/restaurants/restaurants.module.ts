@@ -21,5 +21,6 @@ import { Dish } from './entities/dish.entity';
     CategoryResolver,
     DishResolver,
   ],
+  exports: [],
 })
 export class RestaurantsModule {}

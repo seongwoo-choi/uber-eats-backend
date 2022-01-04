@@ -7,7 +7,7 @@ import { Order } from '../../orders/entities/order.entity';
 
 @InputType('DishChoiceInputType', { isAbstract: true })
 @ObjectType()
-class DishChoice {
+export class DishChoice {
   @Field(() => String)
   name: string;
 
@@ -17,7 +17,7 @@ class DishChoice {
 
 @InputType('DishOptionsInputType', { isAbstract: true })
 @ObjectType()
-class DishOptions extends CoreEntity {
+export class DishOptions extends CoreEntity {
   @Field(() => String)
   name: string;
 
@@ -60,6 +60,7 @@ export class Dish extends CoreEntity {
   restaurant: Restaurant;
 
   @RelationId((dish: Dish) => dish.restaurant)
+  @IsNumber()
   restaurantId: number;
 
   @Field(() => [DishOptions], { nullable: true })
