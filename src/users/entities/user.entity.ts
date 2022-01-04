@@ -18,6 +18,7 @@ import { InternalServerErrorException } from '@nestjs/common';
 import { IsBoolean, IsEmail, IsEnum, IsString } from 'class-validator';
 import { Verification } from './verification.entity';
 import { Restaurant } from '../../restaurants/entities/restaurant.entity';
+import { Order } from '../../orders/entities/order.entity';
 
 // UserRole.Owner => 1 이 되고 DB 에 저장이 된다.
 export enum UserRole {
@@ -66,6 +67,14 @@ export class User extends CoreEntity {
   @Field(() => [Restaurant])
   @OneToMany(() => Restaurant, (restaurant) => restaurant.owner)
   restaurants: Restaurant[];
+
+  @Field(() => [Order])
+  @OneToMany(() => Order, (orders) => orders.customer)
+  orders: Order[];
+
+  @Field(() => [Order])
+  @OneToMany(() => Order, (rides) => rides.driver)
+  rides: Order[];
 
   // DB 에 저장하기 전, 즉 Service 에서 this.userRepository.save(this.userRepository.create()) 메서드가 실행하기 전에 아래 메서드가 실행된다.
   // 해당 인스턴스의 password 를 받아서 해시한다.
