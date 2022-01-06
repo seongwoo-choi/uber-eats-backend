@@ -97,10 +97,13 @@ console.log(process.env.NODE_ENV);
       // 메모리로부터 스키마 파일을 만든다. 위와 같이 실제 파일이 생성되지는 않고 메모리 상에 적재된다.
       // 둘 모두 똑같은 의미를 가진다.
       autoSchemaFile: process.env.NODE_ENV !== 'prod',
+      installSubscriptionHandlers: true,
 
       // graphql module context 옵션 안에 request property 가 있다.
       // 어떤 걸 return 하던지 그 값을 모든 resolver 에서 공유할 수 있다.
-      context: ({ req }) => ({ user: req['user'] }),
+      context: ({ req }) => {
+        return { user: req['user'] };
+      },
     }),
     UsersModule,
     RestaurantsModule,

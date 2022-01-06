@@ -241,10 +241,7 @@ export class OrdersService {
         }
       }
       if (user.role === UserRole.Delivery) {
-        if (
-          status !== OrderStatus.PickedUp &&
-          status !== OrderStatus.Delivered
-        ) {
+        if (status !== OrderStatus.Cooked && status !== OrderStatus.PickedUp) {
           canEdit = false;
         }
       }
