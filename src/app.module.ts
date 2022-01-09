@@ -101,8 +101,12 @@ console.log(process.env.NODE_ENV);
 
       // graphql module context 옵션 안에 request property 가 있다.
       // 어떤 걸 return 하던지 그 값을 모든 resolver 에서 공유할 수 있다.
-      context: ({ req }) => {
-        return { user: req['user'] };
+      context: ({ req, connection }) => {
+        if (req) {
+          return { user: req['user'] };
+        } else {
+          console.log(connection);
+        }
       },
     }),
     UsersModule,

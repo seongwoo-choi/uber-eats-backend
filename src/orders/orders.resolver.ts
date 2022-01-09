@@ -52,8 +52,14 @@ export class OrdersResolver {
     return this.ordersService.editOrder(user, editOrderInput);
   }
 
+  @Mutation(() => Boolean)
+  sinReady() {
+    pubsub.publish('sin', { readySin: 'sin is ready' });
+    return true;
+  }
+
   @Subscription(() => String)
-  sin() {
+  readySin() {
     return pubsub.asyncIterator('sin');
   }
 }
