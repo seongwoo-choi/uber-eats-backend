@@ -59,7 +59,9 @@ export class OrdersResolver {
   }
 
   @Subscription(() => String)
-  readySin() {
+  @Role(['Any'])
+  readySin(@AuthUser() user: User) {
+    console.log(user);
     return pubsub.asyncIterator('sin');
   }
 }

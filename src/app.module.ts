@@ -99,13 +99,20 @@ console.log(process.env.NODE_ENV);
       autoSchemaFile: process.env.NODE_ENV !== 'prod',
       installSubscriptionHandlers: true,
 
+      subscriptions: {
+        'subscriptions-transport-ws': {
+          onConnect: (connectionParams: any) => ({
+            token: connectionParams['X-JWT'],
+          }),
+        },
+      },
+
       // graphql module context 옵션 안에 request property 가 있다.
       // 어떤 걸 return 하던지 그 값을 모든 resolver 에서 공유할 수 있다.
-      context: ({ req, connection }) => {
+      context: ({ req }) => {
+        const TOKEN_KEY = 'x-jwt';
         if (req) {
-          return { user: req['user'] };
-        } else {
-          console.log(connection);
+          return { token: req.headers[TOKEN_KEY] };
         }
       },
     }),
@@ -126,21 +133,4 @@ console.log(process.env.NODE_ENV);
   providers: [],
 })
 // MiddleWare 를 설치하기 위해 NestModule 을 상속받는다.
-export class AppModule implements NestModule {
-  // NestModule 에는 configure 가 있고 consumer 인자를 받는다.
-  // consumer 는 사용자가 정의한 미들웨어를 routes 에 적용하는 방법을 정의해주는 interface 이다.
-  configure(consumer: MiddlewareConsumer): any {
-    // apply() => 사용자가 작성한 미들웨어를 넘겨준다.
-    // .forRoutes() => apply 한 미들웨어를 정확히 어떤 routes 에 적용하고 싶은지 지정할 수 있다.
-    // 즉 어떤 경우에는 이 routes 에서 작동하고, 어떤 경우는 다른 routes 에 동작하는 미들웨어를 만들 수 있다.
-    consumer.apply(JwtMiddleware).forRoutes({
-      // 어떤 라우트에 어떤 HTTP method 가 올 경우까지 상세하게 설정하여 미들웨어를 적용시킬지 지정가능
-      // 모든 미들웨어를 /graphql 의 모든 routes 에 적용
-      // path: '/graphql',
-      path: '/*',
-      // 이 미들웨어를 POST method 에만 적용
-      // method: RequestMethod.POST,
-      method: RequestMethod.POST,
-    });
-  }
-}
+export class AppModule {}
