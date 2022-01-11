@@ -17,6 +17,7 @@ import {
 } from '../common/common.constants';
 import { PubSub } from 'graphql-subscriptions';
 import { OrderUpdateInput } from './dtos/order-update.dto';
+import { TakeOrderInput, TakeOrderOutput } from './dtos/take-order.dto';
 
 @Resolver(() => Order)
 export class OrdersResolver {
@@ -101,5 +102,14 @@ export class OrdersResolver {
   @Role(['Any'])
   orderUpdates(@Args('input') orderUpdateInput: OrderUpdateInput) {
     return this.pubSub.asyncIterator(NEW_ORDER_UPDATE);
+  }
+
+  @Mutation(() => TakeOrderOutput)
+  @Role(['Delivery'])
+  async takeOrder(
+    @AuthUser() driver: User,
+    @Args('input') takeOrderInput: TakeOrderInput,
+  ): Promise<TakeOrderOutput> {
+    return this.ordersService.takeOrder(driver, takeOrderInput);
   }
 }

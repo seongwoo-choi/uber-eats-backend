@@ -23,6 +23,8 @@ import { OrdersModule } from './orders/orders.module';
 import { Order } from './orders/entities/order.entity';
 import { OrderItem } from './orders/entities/order-item.entity';
 import { CommonModule } from './common/common.module';
+import { PaymentsModule } from './payments/payments.module';
+import { Payment } from './payments/entities/payment.entity';
 
 console.log(process.env.NODE_ENV);
 // process.env.NODE_ENV 에 강제적으로 타입을 지정 가능하다.
@@ -84,6 +86,7 @@ console.log(process.env.NODE_ENV);
         Dish,
         Order,
         OrderItem,
+        Payment,
       ],
     }),
     // setting root module, here forRoot() => root module
@@ -130,6 +133,7 @@ console.log(process.env.NODE_ENV);
     }),
     OrdersModule,
     CommonModule,
+    PaymentsModule,
   ],
   controllers: [],
   providers: [],

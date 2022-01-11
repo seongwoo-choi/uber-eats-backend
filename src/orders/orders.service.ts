@@ -17,6 +17,7 @@ import {
   PUB_SUB,
 } from '../common/common.constants';
 import { PubSub } from 'graphql-subscriptions';
+import { TakeOrderInput, TakeOrderOutput } from './dtos/take-order.dto';
 
 @Injectable()
 export class OrdersService {
@@ -252,7 +253,10 @@ export class OrdersService {
         }
       }
       if (user.role === UserRole.Delivery) {
-        if (status !== OrderStatus.Cooked && status !== OrderStatus.PickedUp) {
+        if (
+          status !== OrderStatus.PickedUp &&
+          status !== OrderStatus.Delivered
+        ) {
           canEdit = false;
         }
       }
@@ -288,6 +292,50 @@ export class OrdersService {
       return {
         ok: false,
         error: '주문 수정에 실패했습니다.',
+      };
+    }
+  }
+
+  async takeOrder(
+    driver: User,
+    { id: orderId }: TakeOrderInput,
+  ): Promise<TakeOrderOutput> {
+    try {
+      const order = await this.orderRepository.findOne(orderId);
+      if (!order) {
+        return {
+          ok: false,
+          error: '해당하는 주문을 찾지 못했습니다.',
+        };
+      }
+
+      await this.orderRepository.save([
+        {
+          id: orderId,
+          driver: driver,
+        },
+      ]);
+
+      if (order.driver) {
+        return {
+          ok: false,
+          error: '배달 기사가 이미 존재합니다.',
+        };
+      }
+
+      // 실시간으로 배달기사를 추가 -> publish(알림)을 해준다.
+      // takeOrder -> editOrder 순으로 실행
+      await this.pubSub.publish(NEW_ORDER_UPDATE, {
+        orderUpdates: { ...order, driver },
+      });
+
+      return {
+        ok: true,
+      };
+    } catch {
+      return {
+        ok: false,
+        error: 'take order failed',
       };
     }
   }
