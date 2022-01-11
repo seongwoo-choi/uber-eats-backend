@@ -8,13 +8,17 @@ import { Role } from '../auth/role.decorator';
 import { GetOrdersOutput, GetOrdersInput } from './dtos/get-orders.dto';
 import { GetOrderInput, GetOrderOutput } from './dtos/get-order.dto';
 import { EditOrderInput, EditOrderOutput } from './dtos/edit-order.dto';
+import { Inject } from '@nestjs/common';
+import { PUB_SUB } from '../common/common.constants';
 import { PubSub } from 'graphql-subscriptions';
-
-const pubsub = new PubSub();
 
 @Resolver(() => Order)
 export class OrdersResolver {
-  constructor(private readonly ordersService: OrdersService) {}
+  constructor(
+    @Inject(PUB_SUB)
+    private readonly pubSub: PubSub,
+    private readonly ordersService: OrdersService,
+  ) {}
 
   @Mutation(() => CreateOrderOutput)
   @Role(['Client', 'Owner'])
@@ -54,7 +58,7 @@ export class OrdersResolver {
 
   @Mutation(() => Boolean)
   sinReady() {
-    pubsub.publish('sin', { readySin: 'sin is ready' });
+    this.pubSub.publish('sin', { readySin: 'sin is ready' });
     return true;
   }
 
@@ -62,6 +66,6 @@ export class OrdersResolver {
   @Role(['Any'])
   readySin(@AuthUser() user: User) {
     console.log(user);
-    return pubsub.asyncIterator('sin');
+    return this.pubSub.asyncIterator('sin');
   }
 }

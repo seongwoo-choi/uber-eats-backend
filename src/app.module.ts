@@ -22,6 +22,7 @@ import { Dish } from './restaurants/entities/dish.entity';
 import { OrdersModule } from './orders/orders.module';
 import { Order } from './orders/entities/order.entity';
 import { OrderItem } from './orders/entities/order-item.entity';
+import { CommonModule } from './common/common.module';
 
 console.log(process.env.NODE_ENV);
 // process.env.NODE_ENV 에 강제적으로 타입을 지정 가능하다.
@@ -128,6 +129,7 @@ console.log(process.env.NODE_ENV);
       fromEmail: process.env.MAILGUN_FROM_EMAIL,
     }),
     OrdersModule,
+    CommonModule,
   ],
   controllers: [],
   providers: [],
