@@ -78,7 +78,7 @@ export class User extends CoreEntity {
   rides: Order[];
 
   @Field(() => [Payment])
-  @OneToMany(() => Payment, (payment) => payment.user)
+  @OneToMany(() => Payment, (payment) => payment.user, { eager: true })
   payments: Payment[];
 
   // DB 에 저장하기 전, 즉 Service 에서 this.userRepository.save(this.userRepository.create()) 메서드가 실행하기 전에 아래 메서드가 실행된다.
