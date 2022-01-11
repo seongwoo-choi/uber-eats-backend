@@ -57,13 +57,12 @@ export class OrdersResolver {
   }
 
   @Subscription(() => Order, {
-    filter: (payload, _, context) => {
-      console.log(payload, context);
-      console.log(payload.pendingOrders);
-      const restaurant = payload.pendingOrders.restaurant.id;
-      // 레스토랑 id 로 해당 레스토랑 찾은 후 ownerId 와 context.user.id 같을 경우 true
-      console.log(restaurant);
-      return true;
+    filter: ({ pendingOrders: { ownerId } }, _, { user }) => {
+      // payload 에서 ownerId 를 넘겨주고 그것을 사용한다.
+      return ownerId === user.id;
+    },
+    resolve: ({ pendingOrders: { order } }) => {
+      return order;
     },
   })
   @Role(['Owner'])
