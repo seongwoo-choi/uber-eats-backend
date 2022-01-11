@@ -41,6 +41,9 @@ export class RestaurantRepository extends Repository<Restaurant> {
     const [restaurants, totalResults] = await this.findAndCount({
       take: 25,
       skip: (restaurantsInput.page - 1) * 25,
+      order: {
+        isPromoted: 'DESC',
+      },
     });
 
     if (!restaurants) {
@@ -64,6 +67,9 @@ export class RestaurantRepository extends Repository<Restaurant> {
     const restaurants = await this.find({
       where: {
         category: category,
+      },
+      order: {
+        isPromoted: 'DESC',
       },
       take: 25,
       skip: (categoryInput.page - 1) * 25,

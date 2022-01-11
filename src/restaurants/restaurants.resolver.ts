@@ -66,7 +66,7 @@ export class RestaurantsResolver {
 
   @Mutation(() => DeleteRestaurantOutput)
   @Role(['Owner'])
-  deleteRestaurnat(
+  deleteRestaurant(
     @AuthUser() owner: User,
     @Args('id') id: number,
   ): Promise<DeleteRestaurantOutput> {
