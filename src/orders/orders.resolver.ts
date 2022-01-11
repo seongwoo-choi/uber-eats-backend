@@ -9,9 +9,8 @@ import { GetOrdersOutput, GetOrdersInput } from './dtos/get-orders.dto';
 import { GetOrderInput, GetOrderOutput } from './dtos/get-order.dto';
 import { EditOrderInput, EditOrderOutput } from './dtos/edit-order.dto';
 import { Inject } from '@nestjs/common';
-import { PUB_SUB } from '../common/common.constants';
+import { NEW_PENDING_ORDER, PUB_SUB } from '../common/common.constants';
 import { PubSub } from 'graphql-subscriptions';
-import { filter } from 'rxjs';
 
 @Resolver(() => Order)
 export class OrdersResolver {
@@ -57,22 +56,18 @@ export class OrdersResolver {
     return this.ordersService.editOrder(user, editOrderInput);
   }
 
-  @Mutation(() => Boolean)
-  async sinReady(@Args('id') sinId: number) {
-    await this.pubSub.publish('sin', { readySin: sinId });
-    return true;
-  }
-
-  @Subscription(() => String, {
-    filter: ({ readySin }, { id }, context) => {
-      console.log(readySin, id, context);
-      // payload.sinId 가 variables 와 같을 경우 true
-      return readySin === id;
+  @Subscription(() => Order, {
+    filter: (payload, _, context) => {
+      console.log(payload, context);
+      console.log(payload.pendingOrders);
+      const restaurant = payload.pendingOrders.restaurant.id;
+      // 레스토랑 id 로 해당 레스토랑 찾은 후 ownerId 와 context.user.id 같을 경우 true
+      console.log(restaurant);
+      return true;
     },
-    resolve: ({ readySin }) => `sin id is ${readySin} is ready`,
   })
-  @Role(['Any'])
-  readySin(@Args('id') sinId: number) {
-    return this.pubSub.asyncIterator('sin');
+  @Role(['Owner'])
+  pendingOrders() {
+    return this.pubSub.asyncIterator(NEW_PENDING_ORDER);
   }
 }
