@@ -69,6 +69,7 @@ export class OrdersResolver {
       // payload.sinId 가 variables 와 같을 경우 true
       return readySin === id;
     },
+    resolve: ({ readySin }) => `sin id is ${readySin} is ready`,
   })
   @Role(['Any'])
   readySin(@Args('id') sinId: number) {
