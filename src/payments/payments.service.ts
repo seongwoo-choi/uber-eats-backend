@@ -9,7 +9,7 @@ import {
 import { User } from '../users/entities/user.entity';
 import { Restaurant } from '../restaurants/entities/restaurant.entity';
 import { GetPaymentsOutput } from './dtos/get-payments.dto';
-import { takeUntil } from 'rxjs';
+import { Cron, Interval, SchedulerRegistry, Timeout } from '@nestjs/schedule';
 
 @Injectable()
 export class PaymentsService {
@@ -18,6 +18,7 @@ export class PaymentsService {
     private readonly paymentsRepository: Repository<Payment>,
     @InjectRepository(Restaurant)
     private readonly restaurantRepository: Repository<Restaurant>,
+    private schedulerRegistry: SchedulerRegistry,
   ) {}
 
   async createPayment(
@@ -74,5 +75,25 @@ export class PaymentsService {
         error: '결제 정보를 불러오는데 실패했습니다.',
       };
     }
+  }
+
+  @Cron('30 * * * * *', {
+    name: 'cron job',
+  })
+  checkForPayments() {
+    console.log('Checking for payments...(cron)');
+    const job = this.schedulerRegistry.getCronJob('cron job');
+    console.log(job);
+    job.stop();
+  }
+
+  @Interval(10000)
+  interval() {
+    console.log('Checking for payments...(interval)');
+  }
+
+  @Timeout(3000)
+  after() {
+    console.log('Checking for payments...(timeout)');
   }
 }
