@@ -17,7 +17,6 @@ import {
 import { CoreEntity } from '../../common/entities/core.entity';
 import { User } from '../../users/entities/user.entity';
 import { Restaurant } from '../../restaurants/entities/restaurant.entity';
-import { Dish } from '../../restaurants/entities/dish.entity';
 import { OrderItem } from './order-item.entity';
 import { IsEnum, IsNumber } from 'class-validator';
 
@@ -39,6 +38,7 @@ export class Order extends CoreEntity {
   @ManyToOne(() => User, (user) => user.orders, {
     onDelete: 'SET NULL',
     nullable: true,
+    eager: true,
   })
   customer?: User;
 
@@ -46,6 +46,7 @@ export class Order extends CoreEntity {
   @ManyToOne(() => User, (user) => user.rides, {
     onDelete: 'SET NULL',
     nullable: true,
+    eager: true,
   })
   driver?: User;
 
@@ -53,11 +54,14 @@ export class Order extends CoreEntity {
   @ManyToOne(() => Restaurant, (restaurant) => restaurant.orders, {
     onDelete: 'SET NULL',
     nullable: true,
+    eager: true,
   })
   restaurant?: Restaurant;
 
   @Field(() => [OrderItem])
-  @ManyToMany(() => OrderItem)
+  @ManyToMany(() => OrderItem, {
+    eager: true,
+  })
   @JoinTable() // 다대다 관계를 1:N, N:1 테이블로 만들어주는 테이블 생성
   items: OrderItem[];
 
