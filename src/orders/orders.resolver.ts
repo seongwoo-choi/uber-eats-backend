@@ -11,6 +11,7 @@ import { EditOrderInput, EditOrderOutput } from './dtos/edit-order.dto';
 import { Inject } from '@nestjs/common';
 import { PUB_SUB } from '../common/common.constants';
 import { PubSub } from 'graphql-subscriptions';
+import { filter } from 'rxjs';
 
 @Resolver(() => Order)
 export class OrdersResolver {
@@ -57,15 +58,20 @@ export class OrdersResolver {
   }
 
   @Mutation(() => Boolean)
-  sinReady() {
-    this.pubSub.publish('sin', { readySin: 'sin is ready' });
+  async sinReady(@Args('id') sinId: number) {
+    await this.pubSub.publish('sin', { readySin: sinId });
     return true;
   }
 
-  @Subscription(() => String)
+  @Subscription(() => String, {
+    filter: ({ readySin }, { id }, context) => {
+      console.log(readySin, id, context);
+      // payload.sinId 가 variables 와 같을 경우 true
+      return readySin === id;
+    },
+  })
   @Role(['Any'])
-  readySin(@AuthUser() user: User) {
-    console.log(user);
+  readySin(@Args('id') sinId: number) {
     return this.pubSub.asyncIterator('sin');
   }
 }
